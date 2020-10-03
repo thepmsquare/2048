@@ -12,16 +12,59 @@ import Board from "./Board";
 class Game extends Component {
   constructor(props) {
     super(props);
+    const startSize = 4;
+    const startBoard = [];
+    for (let i = 1; i <= startSize; i++) {
+      for (let j = 1; j <= startSize; j++) {
+        startBoard.push({ row: i, col: j, value: "" });
+      }
+    }
     this.state = {
-      gridSize: 4,
+      gridSize: startSize,
+      board: startBoard,
       snackbar: true,
     };
   }
-  handleSwipe = (eventData) => {
-    console.log(eventData.dir);
+  componentDidMount = () => {
+    this.startGame();
   };
-  handleKeyPress = (eventData) => {
-    console.log(eventData.key);
+  handleInput = (eventData) => {
+    let input = "";
+    if (eventData.dir) {
+      input = eventData.dir;
+    } else if (eventData.key) {
+      input = eventData.key;
+    }
+
+    if (
+      input === "Right" ||
+      input === "a" ||
+      input === "A" ||
+      input === "ArrowRight"
+    ) {
+      console.log("Right");
+    } else if (
+      input === "Left" ||
+      input === "d" ||
+      input === "D" ||
+      input === "ArrowLeft"
+    ) {
+      console.log("Left");
+    } else if (
+      input === "Up" ||
+      input === "w" ||
+      input === "W" ||
+      input === "ArrowUp"
+    ) {
+      console.log("Up");
+    } else if (
+      input === "Down" ||
+      input === "s" ||
+      input === "S" ||
+      input === "ArrowDown"
+    ) {
+      console.log("Down");
+    }
   };
   handleSnackbarClose = () => {
     this.setState(() => {
@@ -29,21 +72,48 @@ class Game extends Component {
     });
   };
   handleChangeGrid = (newGrid) => {
+    const newBoard = [];
+    for (let i = 1; i <= newGrid; i++) {
+      for (let j = 1; j <= newGrid; j++) {
+        newBoard.push({ row: i, col: j, value: "" });
+      }
+    }
     this.setState(() => {
-      return { gridSize: newGrid };
+      return { gridSize: newGrid, board: newBoard };
+    }, this.startGame);
+  };
+  startGame = () => {
+    const choices = [];
+    const options = [...this.state.board];
+    // change this to change probability of 2 or 4 while start.
+    const startValues = [2, 2, 2, 2, 4];
+    while (choices.length !== 2) {
+      let curChoice = Math.floor(Math.random() * options.length);
+      if (!choices.includes(curChoice)) {
+        choices.push(curChoice);
+      }
+    }
+    choices.forEach((choice) => {
+      options[choice].value =
+        startValues[Math.floor(Math.random() * startValues.length)];
+    });
+    this.setState(() => {
+      return {
+        board: options,
+      };
     });
   };
   render = () => {
     return (
-      <Swipeable onSwiped={this.handleSwipe}>
-        <div className="Game" tabIndex={0} onKeyDown={this.handleKeyPress}>
+      <Swipeable onSwiped={this.handleInput}>
+        <div className="Game" tabIndex={0} onKeyDown={this.handleInput}>
           <TitleRow />
           <div className="Game-secondRow">
             <Selector handleChangeGrid={this.handleChangeGrid} />
             <Commands />
           </div>
 
-          <Board size={this.state.gridSize} />
+          <Board size={this.state.gridSize} board={this.state.board} />
         </div>
         {isBrowser && (
           <Snackbar

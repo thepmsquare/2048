@@ -1,23 +1,25 @@
 import React, { Component } from "react";
+import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
 import "./stylesheets/Board.css";
 
 class Board extends Component {
   render = () => {
-    this.size = this.props.size;
-    this.blocks = [];
-    for (let i = 1; i <= this.size; i++) {
-      for (let j = 1; j <= this.size; j++) {
-        this.blocks.push([i, j]);
-      }
-    }
+    const { size, board } = this.props;
     return (
       <div
         className="Board"
-        style={{ gridTemplateColumns: `repeat(${this.size}, 1fr)` }}
+        style={{
+          gridTemplateColumns: `repeat(${size}, 1fr)`,
+          gridTemplateRows: `repeat(${size}, 1fr)`,
+        }}
       >
-        {this.blocks.map((block) => {
-          return <Paper key={block.join("-")}>{block.join("-")}</Paper>;
+        {board.map((block) => {
+          return (
+            <Paper key={`${block.row}-${block.col}`} className="Board-block">
+              <Typography> {block.value} </Typography>
+            </Paper>
+          );
         })}
       </div>
     );

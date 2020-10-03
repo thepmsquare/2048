@@ -4,3 +4,8 @@
   display: grid;
   gap: 0.5rem;
 }
+.Board-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
