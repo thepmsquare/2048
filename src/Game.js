@@ -28,13 +28,18 @@ class Game extends Component {
       return { snackbar: false };
     });
   };
+  handleChangeGrid = (newGrid) => {
+    this.setState(() => {
+      return { gridSize: newGrid };
+    });
+  };
   render = () => {
     return (
       <Swipeable onSwiped={this.handleSwipe}>
         <div className="Game" tabIndex={0} onKeyDown={this.handleKeyPress}>
           <TitleRow />
           <div className="Game-secondRow">
-            <Selector />
+            <Selector handleChangeGrid={this.handleChangeGrid} />
             <Commands />
           </div>
 

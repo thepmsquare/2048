@@ -35,6 +35,7 @@ class Selector extends Component {
     ];
     this.state = {
       displayRow: false,
+      value: 4,
     };
   }
   // for ARIA
@@ -50,6 +51,18 @@ class Selector extends Component {
       }
     });
   };
+  handleChange = (event, newValue) => {
+    this.setState(() => {
+      return {
+        value: newValue,
+      };
+    });
+  };
+  handleConfirm = () => {
+    const newGrid = this.state.value;
+    this.props.handleChangeGrid(newGrid);
+    this.toggleDisplayRow();
+  };
   render = () => {
     return (
       <div className="Selector">
@@ -57,7 +70,7 @@ class Selector extends Component {
         {this.state.displayRow && (
           <div className="Selector-secondRow">
             <Slider
-              defaultValue={4}
+              value={this.state.value}
               getAriaValueText={this.valuetext}
               aria-labelledby="grid-size-adjust-slider"
               valueLabelDisplay="off"
@@ -65,8 +78,9 @@ class Selector extends Component {
               min={3}
               max={8}
               marks={this.marks}
+              onChange={this.handleChange}
             />
-            <Button>Confirm</Button>
+            <Button onClick={this.handleConfirm}>Confirm</Button>
           </div>
         )}
       </div>
