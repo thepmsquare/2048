@@ -1,0 +1,6 @@
+.Board {
+  width: 90vmin;
+  height: 90vmin;
+  display: grid;
+  gap: 0.5rem;
+}
