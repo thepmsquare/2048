@@ -52,6 +52,7 @@ class Selector extends Component {
     });
   };
   handleChange = (event, newValue) => {
+    event.stopPropagation();
     this.setState(() => {
       return {
         value: newValue,
