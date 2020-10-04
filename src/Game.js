@@ -42,28 +42,28 @@ class Game extends Component {
       input === "A" ||
       input === "ArrowRight"
     ) {
-      console.log("Right");
+      this.goRight();
     } else if (
       input === "Left" ||
       input === "d" ||
       input === "D" ||
       input === "ArrowLeft"
     ) {
-      console.log("Left");
+      this.goLeft();
     } else if (
       input === "Up" ||
       input === "w" ||
       input === "W" ||
       input === "ArrowUp"
     ) {
-      console.log("Up");
+      this.goUp();
     } else if (
       input === "Down" ||
       input === "s" ||
       input === "S" ||
       input === "ArrowDown"
     ) {
-      console.log("Down");
+      this.goDown();
     }
   };
   handleSnackbarClose = () => {
@@ -101,6 +101,181 @@ class Game extends Component {
       return {
         board: options,
       };
+    });
+  };
+  goUp = () => {
+    const size = this.state.gridSize;
+    const board = [...this.state.board];
+    const cols = [];
+    const newBoard = [];
+    const tempNew = [];
+    for (let i = 1; i <= size; i++) {
+      cols.push(board.filter((ele) => ele.col === i));
+    }
+    cols.forEach((col) => {
+      let curValues = col.map((ele) => ele.value);
+      let filteredCurValues = curValues.filter((ele) => ele);
+      let mergedCurValues = [];
+      for (let i = 0; i < filteredCurValues.length; i++) {
+        if (filteredCurValues[i] === filteredCurValues[i + 1]) {
+          mergedCurValues.push(filteredCurValues[i] + filteredCurValues[i + 1]);
+          i++;
+        } else {
+          mergedCurValues.push(filteredCurValues[i]);
+        }
+      }
+      while (mergedCurValues.length !== size) {
+        mergedCurValues.push("");
+      }
+      col.forEach((ele, index) => (ele.value = mergedCurValues[index]));
+    });
+
+    for (let i = 0; i < cols.length; i++) {
+      tempNew.push(...cols[i]);
+    }
+    for (let i = 1; i <= size; i++) {
+      for (let j = 1; j <= size; j++) {
+        newBoard.push(tempNew.find((ele) => ele.row === i && ele.col === j));
+      }
+    }
+    this.setState(() => {
+      return { board: newBoard };
+    }, this.addRandomNumber);
+  };
+  goDown = () => {
+    const size = this.state.gridSize;
+    const board = [...this.state.board];
+    const cols = [];
+    const newBoard = [];
+    const tempNew = [];
+    for (let i = 1; i <= size; i++) {
+      cols.push(board.filter((ele) => ele.col === i));
+    }
+    cols.forEach((col) => {
+      let curValues = col.map((ele) => ele.value);
+      let filteredCurValues = curValues.filter((ele) => ele);
+      let mergedCurValues = [];
+      for (let i = filteredCurValues.length - 1; i >= 0; i--) {
+        if (filteredCurValues[i] === filteredCurValues[i - 1]) {
+          mergedCurValues.unshift(
+            filteredCurValues[i] + filteredCurValues[i - 1]
+          );
+          i--;
+        } else {
+          mergedCurValues.unshift(filteredCurValues[i]);
+        }
+      }
+      while (mergedCurValues.length !== size) {
+        mergedCurValues.unshift("");
+      }
+      col.forEach((ele, index) => (ele.value = mergedCurValues[index]));
+    });
+
+    for (let i = 0; i < cols.length; i++) {
+      tempNew.push(...cols[i]);
+    }
+    for (let i = 1; i <= size; i++) {
+      for (let j = 1; j <= size; j++) {
+        newBoard.push(tempNew.find((ele) => ele.row === i && ele.col === j));
+      }
+    }
+    this.setState(() => {
+      return { board: newBoard };
+    }, this.addRandomNumber);
+  };
+  goLeft = () => {
+    const size = this.state.gridSize;
+    const board = [...this.state.board];
+    const rows = [];
+    const newBoard = [];
+    const tempNew = [];
+    for (let i = 1; i <= size; i++) {
+      rows.push(board.filter((ele) => ele.row === i));
+    }
+    rows.forEach((row) => {
+      let curValues = row.map((ele) => ele.value);
+      let filteredCurValues = curValues.filter((ele) => ele);
+      let mergedCurValues = [];
+      for (let i = 0; i < filteredCurValues.length; i++) {
+        if (filteredCurValues[i] === filteredCurValues[i + 1]) {
+          mergedCurValues.push(filteredCurValues[i] + filteredCurValues[i + 1]);
+          i++;
+        } else {
+          mergedCurValues.push(filteredCurValues[i]);
+        }
+      }
+      while (mergedCurValues.length !== size) {
+        mergedCurValues.push("");
+      }
+      row.forEach((ele, index) => (ele.value = mergedCurValues[index]));
+    });
+    for (let i = 0; i < rows.length; i++) {
+      tempNew.push(...rows[i]);
+    }
+    for (let i = 1; i <= size; i++) {
+      for (let j = 1; j <= size; j++) {
+        newBoard.push(tempNew.find((ele) => ele.row === i && ele.col === j));
+      }
+    }
+    this.setState(() => {
+      return { board: newBoard };
+    }, this.addRandomNumber);
+  };
+  goRight = () => {
+    const size = this.state.gridSize;
+    const board = [...this.state.board];
+    const rows = [];
+    const newBoard = [];
+    const tempNew = [];
+    for (let i = 1; i <= size; i++) {
+      rows.push(board.filter((ele) => ele.row === i));
+    }
+    rows.forEach((row) => {
+      let curValues = row.map((ele) => ele.value);
+      let filteredCurValues = curValues.filter((ele) => ele);
+      let mergedCurValues = [];
+      for (let i = filteredCurValues.length - 1; i >= 0; i--) {
+        if (filteredCurValues[i] === filteredCurValues[i - 1]) {
+          mergedCurValues.unshift(
+            filteredCurValues[i] + filteredCurValues[i - 1]
+          );
+          i--;
+        } else {
+          mergedCurValues.unshift(filteredCurValues[i]);
+        }
+      }
+      while (mergedCurValues.length !== size) {
+        mergedCurValues.unshift("");
+      }
+      row.forEach((ele, index) => (ele.value = mergedCurValues[index]));
+    });
+
+    for (let i = 0; i < rows.length; i++) {
+      tempNew.push(...rows[i]);
+    }
+    for (let i = 1; i <= size; i++) {
+      for (let j = 1; j <= size; j++) {
+        newBoard.push(tempNew.find((ele) => ele.row === i && ele.col === j));
+      }
+    }
+    this.setState(() => {
+      return { board: newBoard };
+    }, this.addRandomNumber);
+  };
+  addRandomNumber = () => {
+    const newNumber = [2, 2, 2, 2, 4];
+    const newBoard = [...this.state.board];
+    const options = newBoard.filter((block) => !block.value);
+    const optionsIndex = Math.floor(Math.random() * options.length);
+    const changeThisElement = options[optionsIndex];
+    const indexOfChangedElement = newBoard.findIndex(
+      (ele) =>
+        ele.row === changeThisElement.row && ele.col === changeThisElement.col
+    );
+    newBoard[indexOfChangedElement].value =
+      newNumber[Math.floor(Math.random() * newNumber.length)];
+    this.setState(() => {
+      return { board: newBoard };
     });
   };
   render = () => {
