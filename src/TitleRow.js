@@ -16,7 +16,7 @@ class TitleRow extends Component {
               Score
             </Typography>
             <Typography variant="h6" component="h2">
-              0
+              {this.props.score}
             </Typography>
           </div>
           <div>

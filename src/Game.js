@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Swipeable } from "react-swipeable";
 import { isBrowser } from "react-device-detect";
+import _ from "lodash";
 import Snackbar from "@material-ui/core/Snackbar";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
@@ -23,6 +24,7 @@ class Game extends Component {
       gridSize: startSize,
       board: startBoard,
       snackbar: true,
+      score: 0,
     };
   }
   componentDidMount = () => {
@@ -97,9 +99,14 @@ class Game extends Component {
       options[choice].value =
         startValues[Math.floor(Math.random() * startValues.length)];
     });
+    const score = _.sumBy(
+      options.filter((ele) => ele.value),
+      "value"
+    );
     this.setState(() => {
       return {
         board: options,
+        score,
       };
     });
   };
@@ -263,6 +270,7 @@ class Game extends Component {
     }, this.addRandomNumber);
   };
   addRandomNumber = () => {
+    // change this to change probability of new number.
     const newNumber = [2, 2, 2, 2, 4];
     const newBoard = [...this.state.board];
     const options = newBoard.filter((block) => !block.value);
@@ -274,15 +282,19 @@ class Game extends Component {
     );
     newBoard[indexOfChangedElement].value =
       newNumber[Math.floor(Math.random() * newNumber.length)];
+    const score = _.sumBy(
+      newBoard.filter((ele) => ele.value),
+      "value"
+    );
     this.setState(() => {
-      return { board: newBoard };
+      return { board: newBoard, score };
     });
   };
   render = () => {
     return (
       <Swipeable onSwiped={this.handleInput}>
         <div className="Game" tabIndex={0} onKeyDown={this.handleInput}>
-          <TitleRow />
+          <TitleRow score={this.state.score} />
           <div className="Game-secondRow">
             <Selector handleChangeGrid={this.handleChangeGrid} />
             <Commands />
