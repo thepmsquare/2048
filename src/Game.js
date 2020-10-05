@@ -20,7 +20,7 @@ class Game extends Component {
     this.lowerLimit = 3;
     const allBoards = [];
     for (let i = this.lowerLimit; i <= this.upperLimit; i++) {
-      allBoards.push({ size: i, board: [], sum: 0, best: 0 });
+      allBoards.push({ size: i, board: [], sum: 0, best: 0, history: [] });
     }
     allBoards.forEach((board) => {
       for (let i = 1; i <= board.size; i++) {
@@ -172,6 +172,10 @@ class Game extends Component {
     }
     if (!_.isEqual(oldBoard, newBoard)) {
       const changeThisIndex = allBoards.findIndex((ele) => ele.size === size);
+      allBoards[changeThisIndex].history.push(oldBoard);
+      if (allBoards[changeThisIndex].history.length > 5) {
+        allBoards[changeThisIndex].history.shift();
+      }
       allBoards[changeThisIndex].board = newBoard;
       this.setState(() => {
         return { allBoards };
@@ -221,6 +225,10 @@ class Game extends Component {
     }
     if (!_.isEqual(oldBoard, newBoard)) {
       const changeThisIndex = allBoards.findIndex((ele) => ele.size === size);
+      allBoards[changeThisIndex].history.push(oldBoard);
+      if (allBoards[changeThisIndex].history.length > 5) {
+        allBoards[changeThisIndex].history.shift();
+      }
       allBoards[changeThisIndex].board = newBoard;
       this.setState(() => {
         return { allBoards };
@@ -267,6 +275,10 @@ class Game extends Component {
     }
     if (!_.isEqual(oldBoard, newBoard)) {
       const changeThisIndex = allBoards.findIndex((ele) => ele.size === size);
+      allBoards[changeThisIndex].history.push(oldBoard);
+      if (allBoards[changeThisIndex].history.length > 5) {
+        allBoards[changeThisIndex].history.shift();
+      }
       allBoards[changeThisIndex].board = newBoard;
       this.setState(() => {
         return { allBoards };
@@ -317,6 +329,10 @@ class Game extends Component {
     if (!_.isEqual(oldBoard, newBoard)) {
       const changeThisIndex = allBoards.findIndex((ele) => ele.size === size);
       allBoards[changeThisIndex].board = newBoard;
+      allBoards[changeThisIndex].history.push(oldBoard);
+      if (allBoards[changeThisIndex].history.length > 5) {
+        allBoards[changeThisIndex].history.shift();
+      }
       this.setState(() => {
         return { allBoards };
       }, this.addRandomNumber);
@@ -372,6 +388,17 @@ class Game extends Component {
     allBoards[changeThisIndex].board = board;
     this.setState({ allBoards }, this.startGame);
   };
+  handleUndo = () => {
+    const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
+    const curBoard = allBoards.find((ele) => ele.size === this.state.gridSize);
+    curBoard.board = curBoard.history.pop();
+    const sum = _.sumBy(
+      curBoard.board.filter((ele) => ele.value),
+      "value"
+    );
+    curBoard.sum = sum;
+    this.setState({ allBoards });
+  };
   render = () => {
     let allBoardsWithCurrentGridSize = this.state.allBoards.find(
       (ele) => ele.size === this.state.gridSize
@@ -385,7 +412,11 @@ class Game extends Component {
           />
           <div className="Game-secondRow">
             <Selector handleChangeGrid={this.handleChangeGrid} />
-            <Commands handleReset={this.handleReset} />
+            <Commands
+              numberOfUndos={allBoardsWithCurrentGridSize.history.length}
+              handleReset={this.handleReset}
+              handleUndo={this.handleUndo}
+            />
           </div>
 
           <Board

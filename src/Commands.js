@@ -35,8 +35,8 @@ class Commands extends Component {
   render = () => {
     return (
       <div className="Commands">
-        <Badge badgeContent={5} color="primary">
-          <IconButton>
+        <Badge badgeContent={this.props.numberOfUndos} color="primary">
+          <IconButton onClick={this.props.handleUndo}>
             <Replay />
           </IconButton>
         </Badge>
