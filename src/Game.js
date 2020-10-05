@@ -86,7 +86,7 @@ class Game extends Component {
   };
   startGame = () => {
     const choices = [];
-    const options = [...this.state.board];
+    const options = JSON.parse(JSON.stringify(this.state.board));
     // change this to change probability of 2 or 4 while start.
     const startValues = [2, 2, 2, 2, 4];
     while (choices.length !== 2) {
@@ -284,10 +284,11 @@ class Game extends Component {
   addRandomNumber = () => {
     // change this to change probability of new number.
     const newNumber = [2, 2, 2, 2, 4];
-    const newBoard = [...this.state.board];
+    const newBoard = JSON.parse(JSON.stringify(this.state.board));
     const options = newBoard.filter((block) => !block.value);
     const optionsIndex = Math.floor(Math.random() * options.length);
     const changeThisElement = options[optionsIndex];
+    // this seems redundant now. i didn't know about references before :(
     const indexOfChangedElement = newBoard.findIndex(
       (ele) =>
         ele.row === changeThisElement.row && ele.col === changeThisElement.col
