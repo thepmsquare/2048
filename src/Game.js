@@ -112,7 +112,8 @@ class Game extends Component {
   };
   goUp = () => {
     const size = this.state.gridSize;
-    const board = [...this.state.board];
+    const oldBoard = JSON.parse(JSON.stringify(this.state.board));
+    const board = JSON.parse(JSON.stringify(this.state.board));
     const cols = [];
     const newBoard = [];
     const tempNew = [];
@@ -145,13 +146,16 @@ class Game extends Component {
         newBoard.push(tempNew.find((ele) => ele.row === i && ele.col === j));
       }
     }
-    this.setState(() => {
-      return { board: newBoard };
-    }, this.addRandomNumber);
+    if (!_.isEqual(oldBoard, newBoard)) {
+      this.setState(() => {
+        return { board: newBoard };
+      }, this.addRandomNumber);
+    }
   };
   goDown = () => {
     const size = this.state.gridSize;
-    const board = [...this.state.board];
+    const oldBoard = JSON.parse(JSON.stringify(this.state.board));
+    const board = JSON.parse(JSON.stringify(this.state.board));
     const cols = [];
     const newBoard = [];
     const tempNew = [];
@@ -186,13 +190,16 @@ class Game extends Component {
         newBoard.push(tempNew.find((ele) => ele.row === i && ele.col === j));
       }
     }
-    this.setState(() => {
-      return { board: newBoard };
-    }, this.addRandomNumber);
+    if (!_.isEqual(oldBoard, newBoard)) {
+      this.setState(() => {
+        return { board: newBoard };
+      }, this.addRandomNumber);
+    }
   };
   goLeft = () => {
     const size = this.state.gridSize;
-    const board = [...this.state.board];
+    const oldBoard = JSON.parse(JSON.stringify(this.state.board));
+    const board = JSON.parse(JSON.stringify(this.state.board));
     const rows = [];
     const newBoard = [];
     const tempNew = [];
@@ -224,13 +231,16 @@ class Game extends Component {
         newBoard.push(tempNew.find((ele) => ele.row === i && ele.col === j));
       }
     }
-    this.setState(() => {
-      return { board: newBoard };
-    }, this.addRandomNumber);
+    if (!_.isEqual(oldBoard, newBoard)) {
+      this.setState(() => {
+        return { board: newBoard };
+      }, this.addRandomNumber);
+    }
   };
   goRight = () => {
     const size = this.state.gridSize;
-    const board = [...this.state.board];
+    const oldBoard = JSON.parse(JSON.stringify(this.state.board));
+    const board = JSON.parse(JSON.stringify(this.state.board));
     const rows = [];
     const newBoard = [];
     const tempNew = [];
@@ -265,9 +275,11 @@ class Game extends Component {
         newBoard.push(tempNew.find((ele) => ele.row === i && ele.col === j));
       }
     }
-    this.setState(() => {
-      return { board: newBoard };
-    }, this.addRandomNumber);
+    if (!_.isEqual(oldBoard, newBoard)) {
+      this.setState(() => {
+        return { board: newBoard };
+      }, this.addRandomNumber);
+    }
   };
   addRandomNumber = () => {
     // change this to change probability of new number.
