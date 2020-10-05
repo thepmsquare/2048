@@ -13,10 +13,10 @@ class TitleRow extends Component {
           </Typography>
           <div>
             <Typography variant="h6" component="h2">
-              Score
+              Sum
             </Typography>
             <Typography variant="h6" component="h2">
-              {this.props.score}
+              {this.props.sum}
             </Typography>
           </div>
           <div>
@@ -24,7 +24,7 @@ class TitleRow extends Component {
               Best
             </Typography>
             <Typography variant="h6" component="h2">
-              0
+              {this.props.best}
             </Typography>
           </div>
         </div>

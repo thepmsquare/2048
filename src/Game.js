@@ -13,18 +13,26 @@ import Board from "./Board";
 class Game extends Component {
   constructor(props) {
     super(props);
+    // change this to change default grid size.
     const startSize = 4;
-    const startBoard = [];
-    for (let i = 1; i <= startSize; i++) {
-      for (let j = 1; j <= startSize; j++) {
-        startBoard.push({ row: i, col: j, value: "" });
-      }
+    // change this to change upper and lower limits of grid sizes.
+    this.upperLimit = 8;
+    this.lowerLimit = 3;
+    const allBoards = [];
+    for (let i = this.lowerLimit; i <= this.upperLimit; i++) {
+      allBoards.push({ size: i, board: [], sum: 0, best: 0 });
     }
+    allBoards.forEach((board) => {
+      for (let i = 1; i <= board.size; i++) {
+        for (let j = 1; j <= board.size; j++) {
+          board.board.push({ row: i, col: j, value: "" });
+        }
+      }
+    });
     this.state = {
       gridSize: startSize,
-      board: startBoard,
+      allBoards,
       snackbar: true,
-      score: 0,
     };
   }
   componentDidMount = () => {
@@ -74,19 +82,24 @@ class Game extends Component {
     });
   };
   handleChangeGrid = (newGrid) => {
-    const newBoard = [];
-    for (let i = 1; i <= newGrid; i++) {
-      for (let j = 1; j <= newGrid; j++) {
-        newBoard.push({ row: i, col: j, value: "" });
+    let board = this.state.allBoards.find((ele) => ele.size === newGrid);
+    this.setState(
+      () => {
+        return { gridSize: newGrid };
+      },
+      () => {
+        if (board.sum === 0) {
+          this.startGame();
+        }
       }
-    }
-    this.setState(() => {
-      return { gridSize: newGrid, board: newBoard };
-    }, this.startGame);
+    );
   };
   startGame = () => {
+    const newAllBoards = JSON.parse(JSON.stringify(this.state.allBoards));
+    const options = [
+      ...newAllBoards.find((ele) => ele.size === this.state.gridSize).board,
+    ];
     const choices = [];
-    const options = JSON.parse(JSON.stringify(this.state.board));
     // change this to change probability of 2 or 4 while start.
     const startValues = [2, 2, 2, 2, 4];
     while (choices.length !== 2) {
@@ -99,21 +112,32 @@ class Game extends Component {
       options[choice].value =
         startValues[Math.floor(Math.random() * startValues.length)];
     });
-    const score = _.sumBy(
+    const sum = _.sumBy(
       options.filter((ele) => ele.value),
       "value"
     );
+    const changeThisIndex = newAllBoards.findIndex(
+      (ele) => ele.size === this.state.gridSize
+    );
+    newAllBoards[changeThisIndex].board = options;
+    newAllBoards[changeThisIndex].sum = sum;
+    newAllBoards[changeThisIndex].best =
+      sum > newAllBoards[changeThisIndex].best
+        ? sum
+        : newAllBoards[changeThisIndex].best;
     this.setState(() => {
       return {
-        board: options,
-        score,
+        allBoards: newAllBoards,
       };
     });
   };
   goUp = () => {
     const size = this.state.gridSize;
-    const oldBoard = JSON.parse(JSON.stringify(this.state.board));
-    const board = JSON.parse(JSON.stringify(this.state.board));
+    const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
+    const oldBoard = JSON.parse(
+      JSON.stringify(allBoards.find((ele) => ele.size === size).board)
+    );
+    const board = allBoards.find((ele) => ele.size === size).board;
     const cols = [];
     const newBoard = [];
     const tempNew = [];
@@ -147,15 +171,20 @@ class Game extends Component {
       }
     }
     if (!_.isEqual(oldBoard, newBoard)) {
+      const changeThisIndex = allBoards.findIndex((ele) => ele.size === size);
+      allBoards[changeThisIndex].board = newBoard;
       this.setState(() => {
-        return { board: newBoard };
+        return { allBoards };
       }, this.addRandomNumber);
     }
   };
   goDown = () => {
     const size = this.state.gridSize;
-    const oldBoard = JSON.parse(JSON.stringify(this.state.board));
-    const board = JSON.parse(JSON.stringify(this.state.board));
+    const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
+    const oldBoard = JSON.parse(
+      JSON.stringify(allBoards.find((ele) => ele.size === size).board)
+    );
+    const board = allBoards.find((ele) => ele.size === size).board;
     const cols = [];
     const newBoard = [];
     const tempNew = [];
@@ -191,15 +220,20 @@ class Game extends Component {
       }
     }
     if (!_.isEqual(oldBoard, newBoard)) {
+      const changeThisIndex = allBoards.findIndex((ele) => ele.size === size);
+      allBoards[changeThisIndex].board = newBoard;
       this.setState(() => {
-        return { board: newBoard };
+        return { allBoards };
       }, this.addRandomNumber);
     }
   };
   goLeft = () => {
     const size = this.state.gridSize;
-    const oldBoard = JSON.parse(JSON.stringify(this.state.board));
-    const board = JSON.parse(JSON.stringify(this.state.board));
+    const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
+    const oldBoard = JSON.parse(
+      JSON.stringify(allBoards.find((ele) => ele.size === size).board)
+    );
+    const board = allBoards.find((ele) => ele.size === size).board;
     const rows = [];
     const newBoard = [];
     const tempNew = [];
@@ -232,15 +266,20 @@ class Game extends Component {
       }
     }
     if (!_.isEqual(oldBoard, newBoard)) {
+      const changeThisIndex = allBoards.findIndex((ele) => ele.size === size);
+      allBoards[changeThisIndex].board = newBoard;
       this.setState(() => {
-        return { board: newBoard };
+        return { allBoards };
       }, this.addRandomNumber);
     }
   };
   goRight = () => {
     const size = this.state.gridSize;
-    const oldBoard = JSON.parse(JSON.stringify(this.state.board));
-    const board = JSON.parse(JSON.stringify(this.state.board));
+    const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
+    const oldBoard = JSON.parse(
+      JSON.stringify(allBoards.find((ele) => ele.size === size).board)
+    );
+    const board = allBoards.find((ele) => ele.size === size).board;
     const rows = [];
     const newBoard = [];
     const tempNew = [];
@@ -276,15 +315,20 @@ class Game extends Component {
       }
     }
     if (!_.isEqual(oldBoard, newBoard)) {
+      const changeThisIndex = allBoards.findIndex((ele) => ele.size === size);
+      allBoards[changeThisIndex].board = newBoard;
       this.setState(() => {
-        return { board: newBoard };
+        return { allBoards };
       }, this.addRandomNumber);
     }
   };
   addRandomNumber = () => {
     // change this to change probability of new number.
     const newNumber = [2, 2, 2, 2, 4];
-    const newBoard = JSON.parse(JSON.stringify(this.state.board));
+    const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
+    const newBoard = allBoards.find((ele) => ele.size === this.state.gridSize)
+      .board;
+
     const options = newBoard.filter((block) => !block.value);
     const optionsIndex = Math.floor(Math.random() * options.length);
     const changeThisElement = options[optionsIndex];
@@ -295,25 +339,46 @@ class Game extends Component {
     );
     newBoard[indexOfChangedElement].value =
       newNumber[Math.floor(Math.random() * newNumber.length)];
-    const score = _.sumBy(
+    const sum = _.sumBy(
       newBoard.filter((ele) => ele.value),
       "value"
     );
+
+    const changeThisIndex = allBoards.findIndex(
+      (ele) => ele.size === this.state.gridSize
+    );
+    allBoards[changeThisIndex].board = newBoard;
+    allBoards[changeThisIndex].sum = sum;
+    allBoards[changeThisIndex].best =
+      sum > allBoards[changeThisIndex].best
+        ? sum
+        : allBoards[changeThisIndex].best;
     this.setState(() => {
-      return { board: newBoard, score };
+      return {
+        allBoards,
+      };
     });
   };
   render = () => {
+    let allBoardsWithCurrentGridSize = this.state.allBoards.find(
+      (ele) => ele.size === this.state.gridSize
+    );
     return (
       <Swipeable onSwiped={this.handleInput}>
         <div className="Game" tabIndex={0} onKeyDown={this.handleInput}>
-          <TitleRow score={this.state.score} />
+          <TitleRow
+            sum={allBoardsWithCurrentGridSize.sum}
+            best={allBoardsWithCurrentGridSize.best}
+          />
           <div className="Game-secondRow">
             <Selector handleChangeGrid={this.handleChangeGrid} />
             <Commands />
           </div>
 
-          <Board size={this.state.gridSize} board={this.state.board} />
+          <Board
+            size={this.state.gridSize}
+            board={allBoardsWithCurrentGridSize.board}
+          />
         </div>
         {isBrowser && (
           <Snackbar
