@@ -359,6 +359,19 @@ class Game extends Component {
       };
     });
   };
+  handleReset = () => {
+    const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
+    const board = allBoards.find((ele) => ele.size === this.state.gridSize)
+      .board;
+    board.forEach((block) => {
+      block.value = "";
+    });
+    const changeThisIndex = allBoards.findIndex(
+      (ele) => ele.size === this.state.gridSize
+    );
+    allBoards[changeThisIndex].board = board;
+    this.setState({ allBoards }, this.startGame);
+  };
   render = () => {
     let allBoardsWithCurrentGridSize = this.state.allBoards.find(
       (ele) => ele.size === this.state.gridSize
@@ -372,7 +385,7 @@ class Game extends Component {
           />
           <div className="Game-secondRow">
             <Selector handleChangeGrid={this.handleChangeGrid} />
-            <Commands />
+            <Commands handleReset={this.handleReset} />
           </div>
 
           <Board
