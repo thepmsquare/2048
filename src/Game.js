@@ -16,9 +16,10 @@ import Commands from "./Commands";
 import Board from "./Board";
 class Game extends Component {
   constructor(props) {
+    // JSON.parse(window.localStorage.getItem("jokes") || "[]")
     super(props);
     // change this to change default grid size.
-    const startSize = 4;
+    const startSize = JSON.parse(window.localStorage.getItem("gridSize")) || 4;
     // change this to change upper and lower limits of grid sizes.
     this.upperLimit = 8;
     this.lowerLimit = 3;
@@ -51,15 +52,19 @@ class Game extends Component {
         }
       }
     });
+    const startAllBoards =
+      JSON.parse(window.localStorage.getItem("allBoards")) || allBoards;
     this.state = {
       gridSize: startSize,
-      allBoards,
+      allBoards: startAllBoards,
       snackbar: true,
       winDialog: false,
     };
   }
   componentDidMount = () => {
-    this.startGame();
+    if (!this.state.allBoards.some((board) => board.sum > 0)) {
+      this.startGame();
+    }
   };
   handleInput = (eventData) => {
     let input = "";
@@ -111,6 +116,7 @@ class Game extends Component {
         return { gridSize: newGrid };
       },
       () => {
+        window.localStorage.setItem("gridSize", JSON.stringify(newGrid));
         if (board.sum === 0) {
           this.startGame();
         }
@@ -148,11 +154,16 @@ class Game extends Component {
       sum > newAllBoards[changeThisIndex].best
         ? sum
         : newAllBoards[changeThisIndex].best;
-    this.setState(() => {
-      return {
-        allBoards: newAllBoards,
-      };
-    });
+    this.setState(
+      () => {
+        return {
+          allBoards: newAllBoards,
+        };
+      },
+      () => {
+        window.localStorage.setItem("allBoards", JSON.stringify(newAllBoards));
+      }
+    );
   };
   goUp = () => {
     const size = this.state.gridSize;
@@ -205,6 +216,7 @@ class Game extends Component {
           return { allBoards };
         },
         () => {
+          window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
           if (allBoards[changeThisIndex].needToWin) {
             this.checkForWin();
           } else {
@@ -267,6 +279,7 @@ class Game extends Component {
           return { allBoards };
         },
         () => {
+          window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
           if (allBoards[changeThisIndex].needToWin) {
             this.checkForWin();
           } else {
@@ -326,6 +339,7 @@ class Game extends Component {
           return { allBoards };
         },
         () => {
+          window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
           if (allBoards[changeThisIndex].needToWin) {
             this.checkForWin();
           } else {
@@ -388,6 +402,7 @@ class Game extends Component {
           return { allBoards };
         },
         () => {
+          window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
           if (allBoards[changeThisIndex].needToWin) {
             this.checkForWin();
           } else {
@@ -428,11 +443,16 @@ class Game extends Component {
       sum > allBoards[changeThisIndex].best
         ? sum
         : allBoards[changeThisIndex].best;
-    this.setState(() => {
-      return {
-        allBoards,
-      };
-    });
+    this.setState(
+      () => {
+        return {
+          allBoards,
+        };
+      },
+      () => {
+        window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
+      }
+    );
   };
   handleReset = () => {
     const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
@@ -447,7 +467,10 @@ class Game extends Component {
     allBoards[changeThisIndex].board = board;
     allBoards[changeThisIndex].needToWin = true;
     allBoards[changeThisIndex].history = [];
-    this.setState({ allBoards }, this.startGame);
+    this.setState({ allBoards }, () => {
+      window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
+      this.startGame();
+    });
   };
   handleUndo = () => {
     const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
@@ -458,16 +481,23 @@ class Game extends Component {
       "value"
     );
     curBoard.sum = sum;
-    this.setState({ allBoards });
+    this.setState({ allBoards }, () => {
+      window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
+    });
   };
   checkForWin = () => {
     const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
     const board = allBoards.find((ele) => ele.size === this.state.gridSize);
     if (board.board.some((block) => block.value === board.winCondition)) {
       board.needToWin = false;
-      this.setState(() => {
-        return { allBoards, winDialog: true };
-      });
+      this.setState(
+        () => {
+          return { allBoards, winDialog: true };
+        },
+        () => {
+          window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
+        }
+      );
     } else {
       this.addRandomNumber();
     }
