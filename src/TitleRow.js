@@ -9,7 +9,7 @@ class TitleRow extends Component {
       <AppBar position="sticky">
         <div className="TitleRow">
           <Typography variant="h4" component="h1">
-            2048
+            {this.props.winCondition}
           </Typography>
           <div>
             <Typography variant="h6" component="h2">

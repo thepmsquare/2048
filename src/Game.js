@@ -5,6 +5,10 @@ import _ from "lodash";
 import Snackbar from "@material-ui/core/Snackbar";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
+import Button from "@material-ui/core/Button";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import "./stylesheets/Game.css";
 import TitleRow from "./TitleRow";
 import Selector from "./Selector";
@@ -18,9 +22,27 @@ class Game extends Component {
     // change this to change upper and lower limits of grid sizes.
     this.upperLimit = 8;
     this.lowerLimit = 3;
+    // messy way to fix the special case of 3x3 grid having 1024 as win condition.
+    this.winConditions = [
+      { size: 3, condition: 1024 },
+      { size: 4, condition: 2048 },
+      { size: 5, condition: 2048 },
+      { size: 6, condition: 2048 },
+      { size: 7, condition: 2048 },
+      { size: 8, condition: 2048 },
+    ];
     const allBoards = [];
     for (let i = this.lowerLimit; i <= this.upperLimit; i++) {
-      allBoards.push({ size: i, board: [], sum: 0, best: 0, history: [] });
+      allBoards.push({
+        size: i,
+        board: [],
+        sum: 0,
+        best: 0,
+        history: [],
+        winCondition: this.winConditions.find((ele) => ele.size === i)
+          .condition,
+        needToWin: true,
+      });
     }
     allBoards.forEach((board) => {
       for (let i = 1; i <= board.size; i++) {
@@ -33,6 +55,7 @@ class Game extends Component {
       gridSize: startSize,
       allBoards,
       snackbar: true,
+      winDialog: false,
     };
   }
   componentDidMount = () => {
@@ -177,9 +200,18 @@ class Game extends Component {
         allBoards[changeThisIndex].history.shift();
       }
       allBoards[changeThisIndex].board = newBoard;
-      this.setState(() => {
-        return { allBoards };
-      }, this.addRandomNumber);
+      this.setState(
+        () => {
+          return { allBoards };
+        },
+        () => {
+          if (allBoards[changeThisIndex].needToWin) {
+            this.checkForWin();
+          } else {
+            this.addRandomNumber();
+          }
+        }
+      );
     }
   };
   goDown = () => {
@@ -230,9 +262,18 @@ class Game extends Component {
         allBoards[changeThisIndex].history.shift();
       }
       allBoards[changeThisIndex].board = newBoard;
-      this.setState(() => {
-        return { allBoards };
-      }, this.addRandomNumber);
+      this.setState(
+        () => {
+          return { allBoards };
+        },
+        () => {
+          if (allBoards[changeThisIndex].needToWin) {
+            this.checkForWin();
+          } else {
+            this.addRandomNumber();
+          }
+        }
+      );
     }
   };
   goLeft = () => {
@@ -280,9 +321,18 @@ class Game extends Component {
         allBoards[changeThisIndex].history.shift();
       }
       allBoards[changeThisIndex].board = newBoard;
-      this.setState(() => {
-        return { allBoards };
-      }, this.addRandomNumber);
+      this.setState(
+        () => {
+          return { allBoards };
+        },
+        () => {
+          if (allBoards[changeThisIndex].needToWin) {
+            this.checkForWin();
+          } else {
+            this.addRandomNumber();
+          }
+        }
+      );
     }
   };
   goRight = () => {
@@ -333,9 +383,18 @@ class Game extends Component {
       if (allBoards[changeThisIndex].history.length > 5) {
         allBoards[changeThisIndex].history.shift();
       }
-      this.setState(() => {
-        return { allBoards };
-      }, this.addRandomNumber);
+      this.setState(
+        () => {
+          return { allBoards };
+        },
+        () => {
+          if (allBoards[changeThisIndex].needToWin) {
+            this.checkForWin();
+          } else {
+            this.addRandomNumber();
+          }
+        }
+      );
     }
   };
   addRandomNumber = () => {
@@ -386,6 +445,8 @@ class Game extends Component {
       (ele) => ele.size === this.state.gridSize
     );
     allBoards[changeThisIndex].board = board;
+    allBoards[changeThisIndex].needToWin = true;
+    allBoards[changeThisIndex].history = [];
     this.setState({ allBoards }, this.startGame);
   };
   handleUndo = () => {
@@ -399,6 +460,23 @@ class Game extends Component {
     curBoard.sum = sum;
     this.setState({ allBoards });
   };
+  checkForWin = () => {
+    const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
+    const board = allBoards.find((ele) => ele.size === this.state.gridSize);
+    if (board.board.some((block) => block.value === board.winCondition)) {
+      board.needToWin = false;
+      this.setState(() => {
+        return { allBoards, winDialog: true };
+      });
+    } else {
+      this.addRandomNumber();
+    }
+  };
+  handleDialogClose = () => {
+    this.setState(() => {
+      return { winDialog: false };
+    }, this.addRandomNumber);
+  };
   render = () => {
     let allBoardsWithCurrentGridSize = this.state.allBoards.find(
       (ele) => ele.size === this.state.gridSize
@@ -407,6 +485,7 @@ class Game extends Component {
       <Swipeable onSwiped={this.handleInput}>
         <div className="Game" tabIndex={0} onKeyDown={this.handleInput}>
           <TitleRow
+            winCondition={allBoardsWithCurrentGridSize.winCondition}
             sum={allBoardsWithCurrentGridSize.sum}
             best={allBoardsWithCurrentGridSize.best}
           />
@@ -448,6 +527,21 @@ class Game extends Component {
             }
           />
         )}
+        <Dialog
+          open={this.state.winDialog}
+          onClose={this.handleDialogClose}
+          aria-labelledby="alert-win-dialog-title"
+        >
+          <DialogTitle id="alert-win-dialog-title">You Win!</DialogTitle>
+          <DialogActions>
+            <Button onClick={this.handleReset} color="primary">
+              Reset
+            </Button>
+            <Button onClick={this.handleDialogClose} color="primary" autoFocus>
+              Keep Playing
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Swipeable>
     );
   };
