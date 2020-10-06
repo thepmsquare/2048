@@ -10,6 +10,9 @@ class Board extends Component {
        if(parseInt(palette)===value){
          return colorPalette[palette]
        }
+       if(parseInt(palette)>2048){
+        return colorPalette[2048]
+       }
      }
   }
 
@@ -26,7 +29,7 @@ class Board extends Component {
         {board.map((block) => {         
           return (
             <Paper style={{backgroundColor:this.getColor(block.value),color:'#FFF'}} key={`${block.row}-${block.col}`} className="Board-block">
-              <Typography component="h4" variant="h4" > {block.value} </Typography>
+              <Typography > {block.value} </Typography>
             </Paper>
           );
         })}
