@@ -33,9 +33,10 @@ class Selector extends Component {
         label: "8",
       },
     ];
+    const startSize = JSON.parse(window.localStorage.getItem("gridSize")) || 4;
     this.state = {
       displayRow: false,
-      value: 4,
+      value: startSize,
     };
   }
   // for ARIA
