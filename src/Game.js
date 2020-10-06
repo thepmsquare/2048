@@ -76,15 +76,15 @@ class Game extends Component {
 
     if (
       input === "Right" ||
-      input === "a" ||
-      input === "A" ||
+      input === "d" ||
+      input === "D" ||
       input === "ArrowRight"
     ) {
       this.goRight();
     } else if (
       input === "Left" ||
-      input === "d" ||
-      input === "D" ||
+      input === "a" ||
+      input === "A" ||
       input === "ArrowLeft"
     ) {
       this.goLeft();
