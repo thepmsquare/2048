@@ -6,14 +6,12 @@ import Snackbar from "@material-ui/core/Snackbar";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogTitle from "@material-ui/core/DialogTitle";
 import "./stylesheets/Game.css";
 import TitleRow from "./TitleRow";
 import Selector from "./Selector";
 import Commands from "./Commands";
 import Board from "./Board";
+import DialogApp from "./DialogApp";
 class Game extends Component {
   constructor(props) {
     // JSON.parse(window.localStorage.getItem("jokes") || "[]")
@@ -43,6 +41,7 @@ class Game extends Component {
         winCondition: this.winConditions.find((ele) => ele.size === i)
           .condition,
         needToWin: true,
+        gameOver: false
       });
     }
     allBoards.forEach((board) => {
@@ -59,6 +58,7 @@ class Game extends Component {
       allBoards: startAllBoards,
       snackbar: true,
       winDialog: false,
+      gameOverDialog: false
     };
   }
   componentDidMount = () => {
@@ -66,6 +66,7 @@ class Game extends Component {
       this.startGame();
     }
   };
+
   handleInput = (eventData) => {
     let input = "";
     if (eventData.dir) {
@@ -414,6 +415,7 @@ class Game extends Component {
   };
   addRandomNumber = () => {
     // change this to change probability of new number.
+
     const newNumber = [2, 2, 2, 2, 4];
     const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
     const newBoard = allBoards.find((ele) => ele.size === this.state.gridSize)
@@ -447,6 +449,7 @@ class Game extends Component {
       () => {
         return {
           allBoards,
+          gameOverDialog: this.checkGameOver(allBoards)
         };
       },
       () => {
@@ -467,7 +470,7 @@ class Game extends Component {
     allBoards[changeThisIndex].board = board;
     allBoards[changeThisIndex].needToWin = true;
     allBoards[changeThisIndex].history = [];
-    this.setState({ allBoards }, () => {
+    this.setState({ allBoards, gameOverDialog: false, winDialog: false }, () => {
       window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
       this.startGame();
     });
@@ -484,6 +487,35 @@ class Game extends Component {
     this.setState({ allBoards }, () => {
       window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
     });
+  };
+  checkGameOver = (allBoards) => {
+    const size = this.state.gridSize;
+    let allBoardsWithCurrentGridSize = allBoards.find(
+      (ele) => ele.size === this.state.gridSize
+    );
+   
+    if (!allBoardsWithCurrentGridSize.board.some((block) => block.value === "")) {
+      let gameOver = true;
+      match:
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          if (j < size - 1  && allBoardsWithCurrentGridSize.board[j + (size * i)].value === allBoardsWithCurrentGridSize.board[j + 1 + (size * i)].value) {
+            gameOver = false
+            break match;
+          }
+
+          if (i < size - 1 && allBoardsWithCurrentGridSize.board[j + (size * i) ].value === allBoardsWithCurrentGridSize.board[j + (size * i) + size].value) {
+            gameOver = false
+            break match;
+          }
+        }
+      }
+
+      if (gameOver) {
+        return true;
+      }
+    }
+    return false;
   };
   checkForWin = () => {
     const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
@@ -504,10 +536,11 @@ class Game extends Component {
   };
   handleDialogClose = () => {
     this.setState(() => {
-      return { winDialog: false };
+      return { winDialog: false, gameOverDialog: false };
     }, this.addRandomNumber);
   };
   render = () => {
+  
     let allBoardsWithCurrentGridSize = this.state.allBoards.find(
       (ele) => ele.size === this.state.gridSize
     );
@@ -557,21 +590,27 @@ class Game extends Component {
             }
           />
         )}
-        <Dialog
+
+        <DialogApp
+          title='You Win!'
           open={this.state.winDialog}
-          onClose={this.handleDialogClose}
-          aria-labelledby="alert-win-dialog-title"
-        >
-          <DialogTitle id="alert-win-dialog-title">You Win!</DialogTitle>
-          <DialogActions>
-            <Button onClick={this.handleReset} color="primary">
-              Reset
+          onClose={this.handleDialogClose} >
+          <Button onClick={this.handleReset} color="primary">
+            Reset
             </Button>
-            <Button onClick={this.handleDialogClose} color="primary" autoFocus>
-              Keep Playing
+          <Button onClick={this.handleDialogClose} color="primary" autoFocus>
+            Keep Playing
             </Button>
-          </DialogActions>
-        </Dialog>
+        </DialogApp>
+
+        <DialogApp
+          title='Game Over!'
+          open={this.state.gameOverDialog}
+          onClose={this.handleDialogClose} >
+          <Button onClick={this.handleReset} color="primary">
+            Reset
+            </Button>
+        </DialogApp>
       </Swipeable>
     );
   };
