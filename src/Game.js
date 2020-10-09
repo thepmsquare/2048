@@ -14,7 +14,6 @@ import Board from "./Board";
 import DialogApp from "./DialogApp";
 class Game extends Component {
   constructor(props) {
-    // JSON.parse(window.localStorage.getItem("jokes") || "[]")
     super(props);
     // change this to change default grid size.
     const startSize = JSON.parse(window.localStorage.getItem("gridSize")) || 4;
@@ -41,7 +40,7 @@ class Game extends Component {
         winCondition: this.winConditions.find((ele) => ele.size === i)
           .condition,
         needToWin: true,
-        gameOver: false
+        gameOver: false,
       });
     }
     allBoards.forEach((board) => {
@@ -58,7 +57,7 @@ class Game extends Component {
       allBoards: startAllBoards,
       snackbar: true,
       winDialog: false,
-      gameOverDialog: false
+      gameOverDialog: false,
     };
   }
   componentDidMount = () => {
@@ -449,7 +448,7 @@ class Game extends Component {
       () => {
         return {
           allBoards,
-          gameOverDialog: this.checkGameOver(allBoards)
+          gameOverDialog: this.checkGameOver(allBoards),
         };
       },
       () => {
@@ -470,10 +469,13 @@ class Game extends Component {
     allBoards[changeThisIndex].board = board;
     allBoards[changeThisIndex].needToWin = true;
     allBoards[changeThisIndex].history = [];
-    this.setState({ allBoards, gameOverDialog: false, winDialog: false }, () => {
-      window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
-      this.startGame();
-    });
+    this.setState(
+      { allBoards, gameOverDialog: false, winDialog: false },
+      () => {
+        window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
+        this.startGame();
+      }
+    );
   };
   handleUndo = () => {
     const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
@@ -493,19 +495,26 @@ class Game extends Component {
     let allBoardsWithCurrentGridSize = allBoards.find(
       (ele) => ele.size === this.state.gridSize
     );
-   
-    if (!allBoardsWithCurrentGridSize.board.some((block) => block.value === "")) {
+    if (
+      !allBoardsWithCurrentGridSize.board.some((block) => block.value === "")
+    ) {
       let gameOver = true;
-      match:
-      for (let i = 0; i < size; i++) {
+      match: for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
-          if (j < size - 1  && allBoardsWithCurrentGridSize.board[j + (size * i)].value === allBoardsWithCurrentGridSize.board[j + 1 + (size * i)].value) {
-            gameOver = false
+          if (
+            j < size - 1 &&
+            allBoardsWithCurrentGridSize.board[j + size * i].value ===
+              allBoardsWithCurrentGridSize.board[j + 1 + size * i].value
+          ) {
+            gameOver = false;
             break match;
           }
-
-          if (i < size - 1 && allBoardsWithCurrentGridSize.board[j + (size * i) ].value === allBoardsWithCurrentGridSize.board[j + (size * i) + size].value) {
-            gameOver = false
+          if (
+            i < size - 1 &&
+            allBoardsWithCurrentGridSize.board[j + size * i].value ===
+              allBoardsWithCurrentGridSize.board[j + size * i + size].value
+          ) {
+            gameOver = false;
             break match;
           }
         }
@@ -540,7 +549,6 @@ class Game extends Component {
     }, this.addRandomNumber);
   };
   render = () => {
-  
     let allBoardsWithCurrentGridSize = this.state.allBoards.find(
       (ele) => ele.size === this.state.gridSize
     );
@@ -592,24 +600,26 @@ class Game extends Component {
         )}
 
         <DialogApp
-          title='You Win!'
+          title="You Win!"
           open={this.state.winDialog}
-          onClose={this.handleDialogClose} >
+          onClose={this.handleDialogClose}
+        >
           <Button onClick={this.handleReset} color="primary">
             Reset
-            </Button>
+          </Button>
           <Button onClick={this.handleDialogClose} color="primary" autoFocus>
             Keep Playing
-            </Button>
+          </Button>
         </DialogApp>
 
         <DialogApp
-          title='Game Over!'
+          title="Game Over!"
           open={this.state.gameOverDialog}
-          onClose={this.handleDialogClose} >
+          onClose={this.handleDialogClose}
+        >
           <Button onClick={this.handleReset} color="primary">
             Reset
-            </Button>
+          </Button>
         </DialogApp>
       </Swipeable>
     );
