@@ -617,6 +617,15 @@ class Game extends Component {
           open={this.state.gameOverDialog}
           onClose={this.handleDialogClose}
         >
+          <Button
+            onClick={() => {
+              this.handleUndo();
+              this.handleDialogClose();
+            }}
+            color="primary"
+          >
+            Undo
+          </Button>
           <Button onClick={this.handleReset} color="primary">
             Reset
           </Button>
