@@ -417,8 +417,9 @@ class Game extends Component {
 
     const newNumber = [2, 2, 2, 2, 4];
     const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
-    const newBoard = allBoards.find((ele) => ele.size === this.state.gridSize)
-      .board;
+    const newBoard = allBoards.find(
+      (ele) => ele.size === this.state.gridSize
+    ).board;
 
     const options = newBoard.filter((block) => !block.value);
     const optionsIndex = Math.floor(Math.random() * options.length);
@@ -458,8 +459,9 @@ class Game extends Component {
   };
   handleReset = () => {
     const allBoards = JSON.parse(JSON.stringify(this.state.allBoards));
-    const board = allBoards.find((ele) => ele.size === this.state.gridSize)
-      .board;
+    const board = allBoards.find(
+      (ele) => ele.size === this.state.gridSize
+    ).board;
     board.forEach((block) => {
       block.value = "";
     });
