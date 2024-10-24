@@ -614,7 +614,7 @@ class Game extends Component {
           <Button onClick={this.handleReset} color="primary">
             Reset
           </Button>
-          <Button onClick={this.handleDialogClose} color="primary" autoFocus>
+          <Button onClick={this.handleWinDialogClose} color="primary" autoFocus>
             Keep Playing
           </Button>
         </DialogApp>
@@ -627,7 +627,7 @@ class Game extends Component {
           <Button
             onClick={() => {
               this.handleUndo();
-              this.handleDialogClose();
+              this.handleGameOverDialogClose();
             }}
             color="primary"
           >
