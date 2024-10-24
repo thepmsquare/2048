@@ -545,10 +545,15 @@ class Game extends Component {
       this.addRandomNumber();
     }
   };
-  handleDialogClose = () => {
+  handleWinDialogClose = () => {
     this.setState(() => {
-      return { winDialog: false, gameOverDialog: false };
+      return { winDialog: false };
     }, this.addRandomNumber);
+  };
+  handleGameOverDialogClose = () => {
+    this.setState(() => {
+      return { gameOverDialog: false };
+    });
   };
   render = () => {
     let allBoardsWithCurrentGridSize = this.state.allBoards.find(
@@ -604,7 +609,7 @@ class Game extends Component {
         <DialogApp
           title="You Win!"
           open={this.state.winDialog}
-          onClose={this.handleDialogClose}
+          onClose={this.handleWinDialogClose}
         >
           <Button onClick={this.handleReset} color="primary">
             Reset
@@ -617,7 +622,7 @@ class Game extends Component {
         <DialogApp
           title="Game Over!"
           open={this.state.gameOverDialog}
-          onClose={this.handleDialogClose}
+          onClose={this.handleGameOverDialogClose}
         >
           <Button
             onClick={() => {
