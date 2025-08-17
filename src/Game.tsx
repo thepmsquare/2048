@@ -1,7 +1,7 @@
 import "./stylesheets/Game.css";
 
 import _ from "lodash";
-import React, { Component } from "react";
+import React, { useEffect } from "react";
 import { isBrowser } from "react-device-detect";
 
 import CloseIcon from "@mui/icons-material/Close";
@@ -34,81 +34,58 @@ interface GameBoard {
   needToWin: boolean;
   gameOver: boolean;
 }
-// todo: move to a more appropriate place
-interface GameState {
-  gridSize: number;
-  allBoards: GameBoard[];
-  snackbar: boolean;
-  winDialog: boolean;
-  gameOverDialog: boolean;
-}
 
-class Game extends Component<{}, GameState> {
-  upperLimit: number;
-  lowerLimit: number;
-  winConditions: { size: number; condition: number }[];
-  constructor(props: {}) {
-    super(props);
-    // change this to change default grid size.
-    const storedValue = window.localStorage.getItem("gridSize");
-    const startSize = storedValue ? JSON.parse(storedValue) : 4;
-    // change this to change upper and lower limits of grid sizes.
-    this.upperLimit = 8;
-    this.lowerLimit = 3;
-    // messy way to fix the special case of 3x3 grid having 1024 as win condition.
-    this.winConditions = [
-      { size: 3, condition: 1024 },
-      { size: 4, condition: 2048 },
-      { size: 5, condition: 2048 },
-      { size: 6, condition: 2048 },
-      { size: 7, condition: 2048 },
-      { size: 8, condition: 2048 },
-    ];
-    const allBoards: GameBoard[] = [];
-    for (let i = this.lowerLimit; i <= this.upperLimit; i++) {
-      let winCondition = this.winConditions.find(
-        (ele) => ele.size === i
-      )?.condition;
+const Game = () => {
+  // change this to change default grid size.
+  const storedValue = window.localStorage.getItem("gridSize");
+  const startSize = storedValue ? JSON.parse(storedValue) : 4;
+  // change this to change upper and lower limits of grid sizes.
+  let upperLimit: number = 8;
+  let lowerLimit: number = 3;
+  // messy way to fix the special case of 3x3 grid having 1024 as win condition.
+  let winConditions: { size: number; condition: number }[] = [
+    { size: 3, condition: 1024 },
+    { size: 4, condition: 2048 },
+    { size: 5, condition: 2048 },
+    { size: 6, condition: 2048 },
+    { size: 7, condition: 2048 },
+    { size: 8, condition: 2048 },
+  ];
+  const allBoardsGlobalUnsafe: GameBoard[] = [];
+  for (let i = lowerLimit; i <= upperLimit; i++) {
+    let winCondition = winConditions.find((ele) => ele.size === i)?.condition;
 
-      allBoards.push({
-        size: i,
-        board: [],
-        sum: 0,
-        best: 0,
-        history: [],
-        winCondition: winCondition || 2048, // default to 2048 if not found
-        needToWin: true,
-        gameOver: false,
-      });
-    }
-    allBoards.forEach((board) => {
-      for (let i = 1; i <= board.size; i++) {
-        for (let j = 1; j <= board.size; j++) {
-          board.board.push({ row: i, col: j, value: 0 });
-        }
-      }
+    allBoardsGlobalUnsafe.push({
+      size: i,
+      board: [],
+      sum: 0,
+      best: 0,
+      history: [],
+      winCondition: winCondition || 2048, // default to 2048 if not found
+      needToWin: true,
+      gameOver: false,
     });
-    let startAllBoardsLocalStorage = window.localStorage.getItem("allBoards");
-    const startAllBoards = startAllBoardsLocalStorage
-      ? JSON.parse(startAllBoardsLocalStorage)
-      : allBoards;
-
-    this.state = {
-      gridSize: startSize,
-      allBoards: startAllBoards,
-      snackbar: true,
-      winDialog: false,
-      gameOverDialog: false,
-    };
   }
-
-  componentDidMount = () => {
-    if (!this.state.allBoards.some((board) => board.sum > 0)) {
-      this.startGame();
+  allBoardsGlobalUnsafe.forEach((board) => {
+    for (let i = 1; i <= board.size; i++) {
+      for (let j = 1; j <= board.size; j++) {
+        board.board.push({ row: i, col: j, value: 0 });
+      }
     }
-  };
+  });
+  let startAllBoardsLocalStorage = window.localStorage.getItem("allBoards");
+  const startAllBoards = startAllBoardsLocalStorage
+    ? JSON.parse(startAllBoardsLocalStorage)
+    : allBoardsGlobalUnsafe;
+  const [gridSize, setGridSize] = React.useState<number>(startSize);
+  const [allBoardsState, setAllBoardsState] =
+    React.useState<GameBoard[]>(startAllBoards);
+  const [snackbar, setSnackbar] = React.useState<boolean>(true);
+  const [winDialogOpen, setWinDialogOpen] = React.useState<boolean>(false);
+  const [gameOverDialogOpen, setGameOverDialogOpen] =
+    React.useState<boolean>(false);
 
-  handleKeyInput: KeyboardEventHandler<HTMLDivElement> = (eventData) => {
+  let handleKeyInput: KeyboardEventHandler<HTMLDivElement> = (eventData) => {
     let input = eventData.key;
 
     if (
@@ -117,65 +94,62 @@ class Game extends Component<{}, GameState> {
       input === "D" ||
       input === "ArrowRight"
     ) {
-      this.goRight();
+      goRight();
     } else if (
       input === "Left" ||
       input === "a" ||
       input === "A" ||
       input === "ArrowLeft"
     ) {
-      this.goLeft();
+      goLeft();
     } else if (
       input === "Up" ||
       input === "w" ||
       input === "W" ||
       input === "ArrowUp"
     ) {
-      this.goUp();
+      goUp();
     } else if (
       input === "Down" ||
       input === "s" ||
       input === "S" ||
       input === "ArrowDown"
     ) {
-      this.goDown();
+      goDown();
     }
   };
-  handleSnackbarClose = () => {
-    this.setState(() => {
-      return { snackbar: false };
-    });
+
+  let handleSnackbarClose = () => {
+    setSnackbar(false);
   };
-  handleChangeGrid = (newGrid: number) => {
-    let board = this.state.allBoards.find((ele) => ele.size === newGrid);
+
+  let handleChangeGrid = (newGrid: number) => {
+    let board = allBoardsState.find((ele) => ele.size === newGrid);
     if (board === undefined) {
       console.error("Invalid grid size selected: ", newGrid);
       return;
     }
-    this.setState(
-      () => {
-        return { gridSize: newGrid };
-      },
-      () => {
-        window.localStorage.setItem("gridSize", JSON.stringify(newGrid));
-        if (board.sum === 0) {
-          this.startGame();
-        }
-      }
-    );
+    setGridSize(newGrid);
+    window.localStorage.setItem("gridSize", JSON.stringify(newGrid));
   };
-  startGame = () => {
+
+  let startGame = () => {
     const newAllBoards: GameBoard[] = JSON.parse(
-      JSON.stringify(this.state.allBoards)
+      JSON.stringify(allBoardsState)
     );
-    let finder = newAllBoards.find((ele) => ele.size === this.state.gridSize);
+    let finder = newAllBoards.find((ele) => ele.size === gridSize);
     if (!finder) {
-      console.error(
-        "Invalid grid size for starting game: ",
-        this.state.gridSize
-      );
+      console.error("Invalid grid size for starting game: ", gridSize);
       return;
     }
+    const board = finder.board;
+    board.forEach((block) => {
+      block.value = 0;
+    });
+    finder.needToWin = true;
+    finder.gameOver = false;
+    finder.history = [];
+    // todo: refactor this logic to reduce duplicate code from addRandomNumberInPlace.
     const options = [...finder.board];
     const choices: number[] = [];
     // change this to change probability of 2 or 4 while start.
@@ -195,7 +169,7 @@ class Game extends Component<{}, GameState> {
       "value"
     );
     const changeThisIndex = newAllBoards.findIndex(
-      (ele) => ele.size === this.state.gridSize
+      (ele) => ele.size === gridSize
     );
     newAllBoards[changeThisIndex].board = options;
     newAllBoards[changeThisIndex].sum = sum;
@@ -203,23 +177,16 @@ class Game extends Component<{}, GameState> {
       sum > newAllBoards[changeThisIndex].best
         ? sum
         : newAllBoards[changeThisIndex].best;
-    this.setState(
-      () => {
-        return {
-          allBoards: newAllBoards,
-        };
-      },
-      () => {
-        window.localStorage.setItem("allBoards", JSON.stringify(newAllBoards));
-      }
-    );
+    setAllBoardsState(newAllBoards);
+    window.localStorage.setItem("allBoards", JSON.stringify(newAllBoards));
   };
-  goUp = () => {
-    const size = this.state.gridSize;
-    const allBoards: GameBoard[] = JSON.parse(
-      JSON.stringify(this.state.allBoards)
+
+  let goUp = () => {
+    const size = gridSize;
+    const allBoardsLocalClone: GameBoard[] = JSON.parse(
+      JSON.stringify(allBoardsState)
     );
-    let finder = allBoards.find((ele) => ele.size === size);
+    let finder = allBoardsLocalClone.find((ele) => ele.size === size);
     if (!finder) {
       console.error("Invalid grid size for going up: ", size);
       return;
@@ -264,33 +231,33 @@ class Game extends Component<{}, GameState> {
       }
     }
     if (!_.isEqual(oldBoard, newBoard)) {
-      const changeThisIndex = allBoards.findIndex((ele) => ele.size === size);
-      allBoards[changeThisIndex].history.push(oldBoard);
-      if (allBoards[changeThisIndex].history.length > 5) {
-        allBoards[changeThisIndex].history.shift();
+      const changeThisIndex = allBoardsLocalClone.findIndex(
+        (ele) => ele.size === size
+      );
+      allBoardsLocalClone[changeThisIndex].history.push(oldBoard);
+      if (allBoardsLocalClone[changeThisIndex].history.length > 5) {
+        allBoardsLocalClone[changeThisIndex].history.shift();
       }
-      allBoards[changeThisIndex].board = newBoard;
-      this.setState(
-        () => {
-          return { allBoards };
-        },
-        () => {
-          window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
-          if (allBoards[changeThisIndex].needToWin) {
-            this.checkForWin();
-          } else {
-            this.addRandomNumber();
-          }
-        }
+      allBoardsLocalClone[changeThisIndex].board = newBoard;
+      if (allBoardsLocalClone[changeThisIndex].needToWin) {
+        checkForWin(allBoardsLocalClone[changeThisIndex]);
+      } else {
+        addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex]);
+      }
+      setAllBoardsState(allBoardsLocalClone);
+      window.localStorage.setItem(
+        "allBoards",
+        JSON.stringify(allBoardsLocalClone)
       );
     }
   };
-  goDown = () => {
-    const size = this.state.gridSize;
-    const allBoards: GameBoard[] = JSON.parse(
-      JSON.stringify(this.state.allBoards)
+
+  let goDown = () => {
+    const size = gridSize;
+    const allBoardsLocalClone: GameBoard[] = JSON.parse(
+      JSON.stringify(allBoardsState)
     );
-    let finder = allBoards.find((ele) => ele.size === size);
+    let finder = allBoardsLocalClone.find((ele) => ele.size === size);
     if (!finder) {
       console.error("Invalid grid size for going down: ", size);
       return;
@@ -337,33 +304,33 @@ class Game extends Component<{}, GameState> {
       }
     }
     if (!_.isEqual(oldBoard, newBoard)) {
-      const changeThisIndex = allBoards.findIndex((ele) => ele.size === size);
-      allBoards[changeThisIndex].history.push(oldBoard);
-      if (allBoards[changeThisIndex].history.length > 5) {
-        allBoards[changeThisIndex].history.shift();
+      const changeThisIndex = allBoardsLocalClone.findIndex(
+        (ele) => ele.size === size
+      );
+      allBoardsLocalClone[changeThisIndex].history.push(oldBoard);
+      if (allBoardsLocalClone[changeThisIndex].history.length > 5) {
+        allBoardsLocalClone[changeThisIndex].history.shift();
       }
-      allBoards[changeThisIndex].board = newBoard;
-      this.setState(
-        () => {
-          return { allBoards };
-        },
-        () => {
-          window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
-          if (allBoards[changeThisIndex].needToWin) {
-            this.checkForWin();
-          } else {
-            this.addRandomNumber();
-          }
-        }
+      allBoardsLocalClone[changeThisIndex].board = newBoard;
+      if (allBoardsLocalClone[changeThisIndex].needToWin) {
+        checkForWin(allBoardsLocalClone[changeThisIndex]);
+      } else {
+        addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex]);
+      }
+      setAllBoardsState(allBoardsLocalClone);
+      window.localStorage.setItem(
+        "allBoards",
+        JSON.stringify(allBoardsLocalClone)
       );
     }
   };
-  goLeft = () => {
-    const size = this.state.gridSize;
-    const allBoards: GameBoard[] = JSON.parse(
-      JSON.stringify(this.state.allBoards)
+
+  let goLeft = () => {
+    const size = gridSize;
+    const allBoardsLocalClone: GameBoard[] = JSON.parse(
+      JSON.stringify(allBoardsState)
     );
-    let finder = allBoards.find((ele) => ele.size === size);
+    let finder = allBoardsLocalClone.find((ele) => ele.size === size);
     if (!finder) {
       console.error("Invalid grid size for going left: ", size);
       return;
@@ -407,33 +374,33 @@ class Game extends Component<{}, GameState> {
       }
     }
     if (!_.isEqual(oldBoard, newBoard)) {
-      const changeThisIndex = allBoards.findIndex((ele) => ele.size === size);
-      allBoards[changeThisIndex].history.push(oldBoard);
-      if (allBoards[changeThisIndex].history.length > 5) {
-        allBoards[changeThisIndex].history.shift();
+      const changeThisIndex = allBoardsLocalClone.findIndex(
+        (ele) => ele.size === size
+      );
+      allBoardsLocalClone[changeThisIndex].history.push(oldBoard);
+      if (allBoardsLocalClone[changeThisIndex].history.length > 5) {
+        allBoardsLocalClone[changeThisIndex].history.shift();
       }
-      allBoards[changeThisIndex].board = newBoard;
-      this.setState(
-        () => {
-          return { allBoards };
-        },
-        () => {
-          window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
-          if (allBoards[changeThisIndex].needToWin) {
-            this.checkForWin();
-          } else {
-            this.addRandomNumber();
-          }
-        }
+      allBoardsLocalClone[changeThisIndex].board = newBoard;
+      if (allBoardsLocalClone[changeThisIndex].needToWin) {
+        checkForWin(allBoardsLocalClone[changeThisIndex]);
+      } else {
+        addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex]);
+      }
+      setAllBoardsState(allBoardsLocalClone);
+      window.localStorage.setItem(
+        "allBoards",
+        JSON.stringify(allBoardsLocalClone)
       );
     }
   };
-  goRight = () => {
-    const size = this.state.gridSize;
-    const allBoards: GameBoard[] = JSON.parse(
-      JSON.stringify(this.state.allBoards)
+
+  let goRight = () => {
+    const size = gridSize;
+    const allBoardsLocalClone: GameBoard[] = JSON.parse(
+      JSON.stringify(allBoardsState)
     );
-    let finder = allBoards.find((ele) => ele.size === size);
+    let finder = allBoardsLocalClone.find((ele) => ele.size === size);
     if (!finder) {
       console.error("Invalid grid size for going right: ", size);
       return;
@@ -480,114 +447,63 @@ class Game extends Component<{}, GameState> {
       }
     }
     if (!_.isEqual(oldBoard, newBoard)) {
-      const changeThisIndex = allBoards.findIndex((ele) => ele.size === size);
-      allBoards[changeThisIndex].board = newBoard;
-      allBoards[changeThisIndex].history.push(oldBoard);
-      if (allBoards[changeThisIndex].history.length > 5) {
-        allBoards[changeThisIndex].history.shift();
+      const changeThisIndex = allBoardsLocalClone.findIndex(
+        (ele) => ele.size === size
+      );
+      allBoardsLocalClone[changeThisIndex].board = newBoard;
+      allBoardsLocalClone[changeThisIndex].history.push(oldBoard);
+      if (allBoardsLocalClone[changeThisIndex].history.length > 5) {
+        allBoardsLocalClone[changeThisIndex].history.shift();
       }
-      this.setState(
-        () => {
-          return { allBoards };
-        },
-        () => {
-          window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
-          if (allBoards[changeThisIndex].needToWin) {
-            this.checkForWin();
-          } else {
-            this.addRandomNumber();
-          }
-        }
+      if (allBoardsLocalClone[changeThisIndex].needToWin) {
+        checkForWin(allBoardsLocalClone[changeThisIndex]);
+      } else {
+        addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex]);
+      }
+      setAllBoardsState(allBoardsLocalClone);
+      window.localStorage.setItem(
+        "allBoards",
+        JSON.stringify(allBoardsLocalClone)
       );
     }
   };
-  addRandomNumber = () => {
-    // change this to change probability of new number.
 
+  let addRandomNumberInPlace = (board: GameBoard) => {
+    // change this to change probability of new number.
     const newNumber = [2, 2, 2, 2, 4];
-    const allBoards: GameBoard[] = JSON.parse(
-      JSON.stringify(this.state.allBoards)
-    );
-    let finder = allBoards.find((ele) => ele.size === this.state.gridSize);
-    if (!finder) {
-      console.error(
-        "Invalid grid size for adding random number: ",
-        this.state.gridSize
-      );
-      return;
-    }
-    const newBoard = finder.board;
+    const newBoard = board.board;
 
     const options = newBoard.filter((block) => !block.value);
     const optionsIndex = Math.floor(Math.random() * options.length);
     const changeThisElement = options[optionsIndex];
     // this seems redundant now. i didn't know about references before :(
-    const indexOfChangedElement = newBoard.findIndex(
-      (ele) =>
-        ele.row === changeThisElement.row && ele.col === changeThisElement.col
-    );
-    newBoard[indexOfChangedElement].value =
+    // const indexOfChangedElement = newBoard.findIndex(
+    //   (ele) =>
+    //     ele.row === changeThisElement.row && ele.col === changeThisElement.col
+    // );
+    changeThisElement.value =
       newNumber[Math.floor(Math.random() * newNumber.length)];
     const sum = _.sumBy(
       newBoard.filter((ele) => ele.value),
       "value"
     );
 
-    const changeThisIndex = allBoards.findIndex(
-      (ele) => ele.size === this.state.gridSize
-    );
-    allBoards[changeThisIndex].board = newBoard;
-    allBoards[changeThisIndex].sum = sum;
-    allBoards[changeThisIndex].best =
-      sum > allBoards[changeThisIndex].best
-        ? sum
-        : allBoards[changeThisIndex].best;
-    this.setState(
-      () => {
-        return {
-          allBoards,
-          gameOverDialog: this.checkGameOver(allBoards),
-        };
-      },
-      () => {
-        window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
-      }
-    );
+    // allBoards[changeThisIndex].board = newBoard;
+    board.sum = sum;
+    board.best = sum > board.best ? sum : board.best;
   };
-  handleReset = () => {
-    const allBoards: GameBoard[] = JSON.parse(
-      JSON.stringify(this.state.allBoards)
-    );
-    let finder = allBoards.find((ele) => ele.size === this.state.gridSize);
-    if (!finder) {
-      console.error("Invalid grid size for resetting: ", this.state.gridSize);
-      return;
-    }
-    const board = finder.board;
-    board.forEach((block) => {
-      block.value = 0;
-    });
-    const changeThisIndex = allBoards.findIndex(
-      (ele) => ele.size === this.state.gridSize
-    );
-    allBoards[changeThisIndex].board = board;
-    allBoards[changeThisIndex].needToWin = true;
-    allBoards[changeThisIndex].history = [];
-    this.setState(
-      { allBoards, gameOverDialog: false, winDialog: false },
-      () => {
-        window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
-        this.startGame();
-      }
-    );
+
+  let handleReset = () => {
+    startGame();
   };
-  handleUndo = () => {
-    const allBoards: GameBoard[] = JSON.parse(
-      JSON.stringify(this.state.allBoards)
+
+  let handleUndo = () => {
+    const allBoardsLocalClone: GameBoard[] = JSON.parse(
+      JSON.stringify(allBoardsState)
     );
-    const curBoard = allBoards.find((ele) => ele.size === this.state.gridSize);
+    const curBoard = allBoardsLocalClone.find((ele) => ele.size === gridSize);
     if (!curBoard) {
-      console.error("Invalid grid size for undo: ", this.state.gridSize);
+      console.error("Invalid grid size for undo: ", gridSize);
       return;
     }
     let newBoard = curBoard.history.pop();
@@ -599,20 +515,20 @@ class Game extends Component<{}, GameState> {
       "value"
     );
     curBoard.sum = sum;
-    this.setState({ allBoards }, () => {
-      window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
-    });
+    setAllBoardsState(allBoardsLocalClone);
+    window.localStorage.setItem(
+      "allBoards",
+      JSON.stringify(allBoardsLocalClone)
+    );
   };
-  checkGameOver = (allBoards: GameBoard[]) => {
-    const size = this.state.gridSize;
-    let allBoardsWithCurrentGridSize = allBoards.find(
-      (ele) => ele.size === this.state.gridSize
+
+  let checkGameOver = (allBoardsParam: GameBoard[]) => {
+    const size = gridSize;
+    let allBoardsWithCurrentGridSize = allBoardsParam.find(
+      (ele) => ele.size === gridSize
     );
     if (!allBoardsWithCurrentGridSize) {
-      console.error(
-        "Invalid grid size for checking game over: ",
-        this.state.gridSize
-      );
+      console.error("Invalid grid size for checking game over: ", gridSize);
       return false;
     }
     if (
@@ -646,130 +562,147 @@ class Game extends Component<{}, GameState> {
     }
     return false;
   };
-  checkForWin = () => {
-    const allBoards: GameBoard[] = JSON.parse(
-      JSON.stringify(this.state.allBoards)
+
+  let checkForWin = (board: GameBoard) => {
+    if (board.board.some((block) => block.value === board.winCondition)) {
+      board.needToWin = false;
+      setWinDialogOpen(true);
+    } else {
+      addRandomNumberInPlace(board);
+    }
+  };
+
+  let handleWinDialogClose = () => {
+    setWinDialogOpen(false);
+    const allBoardsLocalClone: GameBoard[] = JSON.parse(
+      JSON.stringify(allBoardsState)
     );
-    const board = allBoards.find((ele) => ele.size === this.state.gridSize);
-    if (!board) {
+    const changeThisIndex = allBoardsLocalClone.findIndex(
+      (ele) => ele.size === gridSize
+    );
+    if (changeThisIndex === -1) {
       console.error(
-        "Invalid grid size for checking win: ",
-        this.state.gridSize
+        "Invalid grid size for handling win dialog close: ",
+        gridSize
       );
       return;
     }
-    if (board.board.some((block) => block.value === board.winCondition)) {
-      board.needToWin = false;
-      this.setState(
-        () => {
-          return { allBoards, winDialog: true };
-        },
-        () => {
-          window.localStorage.setItem("allBoards", JSON.stringify(allBoards));
-        }
-      );
-    } else {
-      this.addRandomNumber();
-    }
+    let board = allBoardsLocalClone[changeThisIndex];
+    addRandomNumberInPlace(board);
   };
-  handleWinDialogClose = () => {
-    this.setState(() => {
-      return { winDialog: false };
-    }, this.addRandomNumber);
-  };
-  handleGameOverDialogClose = () => {
-    this.setState(() => {
-      return { gameOverDialog: false };
-    });
-  };
-  render = () => {
-    let allBoardsWithCurrentGridSize = this.state.allBoards.find(
-      (ele) => ele.size === this.state.gridSize
-    );
-    if (!allBoardsWithCurrentGridSize) {
-      return <div>error</div>;
-    }
-    return (
-      <>
-        <div className="Game" tabIndex={0} onKeyDown={this.handleKeyInput}>
-          <TitleRow
-            winCondition={allBoardsWithCurrentGridSize.winCondition}
-            sum={allBoardsWithCurrentGridSize.sum}
-            best={allBoardsWithCurrentGridSize.best}
-          />
-          <div className="Game-secondRow">
-            <Selector handleChangeGrid={this.handleChangeGrid} />
-            <Commands
-              numberOfUndos={allBoardsWithCurrentGridSize.history.length}
-              handleReset={this.handleReset}
-              handleUndo={this.handleUndo}
-            />
-          </div>
 
-          <Board
-            size={this.state.gridSize}
-            board={allBoardsWithCurrentGridSize.board}
+  let handleGameOverDialogClose = () => {
+    setGameOverDialogOpen(false);
+  };
+
+  let allBoardsWithCurrentGridSize = allBoardsState.find(
+    (ele) => ele.size === gridSize
+  );
+
+  if (!allBoardsWithCurrentGridSize) {
+    return <div>error</div>;
+  }
+
+  useEffect(() => {
+    if (!allBoardsState.some((board) => board.sum > 0)) {
+      startGame();
+    }
+  }, []);
+
+  useEffect(() => {
+    const allBoardsLocalClone: GameBoard[] = JSON.parse(
+      JSON.stringify(allBoardsState)
+    );
+    let board = allBoardsLocalClone.find((ele) => ele.size === gridSize);
+    if (!board) {
+      console.error("Invalid grid size for checking start game: ", gridSize);
+      return;
+    }
+    if (board.sum === 0) {
+      startGame();
+    }
+  }, [gridSize]);
+
+  useEffect(() => {
+    setGameOverDialogOpen(checkGameOver(allBoardsState));
+  }, [allBoardsState]);
+  return (
+    <>
+      <div className="Game" tabIndex={0} onKeyDown={handleKeyInput}>
+        <TitleRow
+          winCondition={allBoardsWithCurrentGridSize.winCondition}
+          sum={allBoardsWithCurrentGridSize.sum}
+          best={allBoardsWithCurrentGridSize.best}
+        />
+        <div className="Game-secondRow">
+          <Selector handleChangeGrid={handleChangeGrid} />
+          <Commands
+            numberOfUndos={allBoardsWithCurrentGridSize.history.length}
+            handleReset={handleReset}
+            handleUndo={handleUndo}
           />
         </div>
-        {isBrowser && (
-          <Snackbar
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "left",
-            }}
-            open={this.state.snackbar}
-            autoHideDuration={6000}
-            onClose={this.handleSnackbarClose}
-            message="Use AWSD or Arrow Keys to Play."
-            action={
-              <React.Fragment>
-                <IconButton
-                  size="small"
-                  aria-label="close"
-                  color="inherit"
-                  onClick={this.handleSnackbarClose}
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </React.Fragment>
-            }
-          />
-        )}
 
-        <DialogApp
-          title="You Win!"
-          open={this.state.winDialog}
-          onClose={this.handleWinDialogClose}
-        >
-          <Button onClick={this.handleReset} color="primary">
-            Reset
-          </Button>
-          <Button onClick={this.handleWinDialogClose} color="primary" autoFocus>
-            Keep Playing
-          </Button>
-        </DialogApp>
+        <Board size={gridSize} board={allBoardsWithCurrentGridSize.board} />
+      </div>
+      {isBrowser && (
+        <Snackbar
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+          open={snackbar}
+          autoHideDuration={6000}
+          onClose={handleSnackbarClose}
+          message="Use AWSD or Arrow Keys to Play."
+          action={
+            <React.Fragment>
+              <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleSnackbarClose}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </React.Fragment>
+          }
+        />
+      )}
 
-        <DialogApp
-          title="Game Over!"
-          open={this.state.gameOverDialog}
-          onClose={this.handleGameOverDialogClose}
+      <DialogApp
+        title="You Win!"
+        open={winDialogOpen}
+        onClose={handleWinDialogClose}
+      >
+        <Button onClick={handleReset} color="primary">
+          Reset
+        </Button>
+        <Button onClick={handleWinDialogClose} color="primary" autoFocus>
+          Keep Playing
+        </Button>
+      </DialogApp>
+
+      <DialogApp
+        title="Game Over!"
+        open={gameOverDialogOpen}
+        onClose={handleGameOverDialogClose}
+      >
+        <Button
+          onClick={() => {
+            handleUndo();
+            handleGameOverDialogClose();
+          }}
+          color="primary"
         >
-          <Button
-            onClick={() => {
-              this.handleUndo();
-              this.handleGameOverDialogClose();
-            }}
-            color="primary"
-          >
-            Undo
-          </Button>
-          <Button onClick={this.handleReset} color="primary">
-            Reset
-          </Button>
-        </DialogApp>
-      </>
-    );
-  };
-}
+          Undo
+        </Button>
+        <Button onClick={handleReset} color="primary">
+          Reset
+        </Button>
+      </DialogApp>
+    </>
+  );
+};
 
 export default Game;
