@@ -3,6 +3,7 @@ import "./stylesheets/Game.css";
 import _ from "lodash";
 import React, { useEffect } from "react";
 import { isBrowser } from "react-device-detect";
+import { useSwipeable } from "react-swipeable";
 
 import CloseIcon from "@mui/icons-material/Close";
 import Button from "@mui/material/Button";
@@ -626,9 +627,23 @@ const Game = () => {
   useEffect(() => {
     setGameOverDialogOpen(checkGameOver(allBoardsState));
   }, [allBoardsState]);
+
+  // misc
+  const handlers = useSwipeable({
+    onSwipedUp: goUp,
+    onSwipedDown: goDown,
+    onSwipedLeft: goLeft,
+    onSwipedRight: goRight,
+    preventScrollOnSwipe: true,
+  });
   return (
     <>
-      <div className="Game" tabIndex={0} onKeyDown={handleKeyInput}>
+      <div
+        className="Game"
+        tabIndex={0}
+        onKeyDown={handleKeyInput}
+        {...handlers}
+      >
         <TitleRow
           winCondition={allBoardsWithCurrentGridSize.winCondition}
           sum={allBoardsWithCurrentGridSize.sum}
