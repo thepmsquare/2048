@@ -1,0 +1,14 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+	<title>square</title>
+	<style>
+		.background {
+			fill: #000000;
+		}
+
+		.square {
+			fill: #00ffff;
+		}
+	</style>
+	<rect class="background" x="0" y="0" width="1080" height="1080" />
+	<path class="square" d="M790 290 V790 H290 V290 Z" />
+</svg>
