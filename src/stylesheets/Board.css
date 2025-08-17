@@ -1,0 +1,11 @@
+.Board {
+  width: 90vmin;
+  height: 90vmin;
+  display: grid;
+  gap: 0.5rem;
+}
+.Board-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
