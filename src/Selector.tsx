@@ -6,16 +6,8 @@ import Button from "@mui/material/Button";
 import Slider from "@mui/material/Slider";
 
 import type { SliderOwnProps } from "@mui/material/Slider";
+import type { SelectorProps, SelectorState } from "./types/All";
 
-// todo: move to a more appropriate place
-interface SelectorProps {
-  handleChangeGrid: (newGrid: number) => void;
-}
-// todo: move to a more appropriate place
-interface SelectorState {
-  displayRow: boolean;
-  value: number;
-}
 class Selector extends Component<SelectorProps, SelectorState> {
   marks: { value: number; label: string }[];
   constructor(props: SelectorProps) {

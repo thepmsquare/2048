@@ -5,12 +5,7 @@ import { Component } from "react";
 import AppBar from "@mui/material/AppBar";
 import Typography from "@mui/material/Typography";
 
-// todo: move to a more appropriate place
-interface TitleRowProps {
-  winCondition: number;
-  sum: number;
-  best: number;
-}
+import type { TitleRowProps } from "./types/All";
 
 class TitleRow extends Component<TitleRowProps> {
   render = () => {

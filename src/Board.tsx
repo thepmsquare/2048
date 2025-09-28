@@ -5,17 +5,7 @@ import { Component } from "react";
 import colorPalette from "./constant.ts";
 import SingleBlock from "./SingleBlock.tsx";
 
-// todo: move to a more appropriate place
-interface Block {
-  row: number;
-  col: number;
-  value: number;
-}
-// todo: move to a more appropriate place
-interface BoardProps {
-  size: number;
-  board: Block[];
-}
+import type { BoardProps } from "./types/All.ts";
 
 class Board extends Component<BoardProps> {
   getColor(value: number): string | undefined {

@@ -17,24 +17,7 @@ import Selector from "./Selector.tsx";
 import TitleRow from "./TitleRow.tsx";
 
 import type { KeyboardEventHandler } from "react";
-
-// todo: move to a more appropriate place
-interface Block {
-  row: number;
-  col: number;
-  value: number;
-}
-// todo: move to a more appropriate place
-interface GameBoard {
-  size: number;
-  board: Block[];
-  sum: number;
-  best: number;
-  history: Block[][];
-  winCondition: number;
-  needToWin: boolean;
-  gameOver: boolean;
-}
+import type { GameBoard } from "./types/All.ts";
 
 const Game = () => {
   // change this to change default grid size.

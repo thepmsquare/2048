@@ -1,8 +1,4 @@
-// todo: move to a more appropriate place
-// todo: keep a better type
-interface ColorPalette {
-  [key: number]: string;
-}
+import type { ColorPalette } from "./types/All";
 
 const colorPalette: ColorPalette = {
   1: "#66bb6a",

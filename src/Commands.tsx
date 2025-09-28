@@ -13,17 +13,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 
-// todo: move to a more appropriate place
-interface CommandsProps {
-  numberOfUndos: number;
-  handleUndo: () => void;
-  handleReset: () => void;
-}
-
-// todo: move to a more appropriate place
-interface CommandsState {
-  showDialog: boolean;
-}
+import type { CommandsProps, CommandsState } from "./types/All";
 
 class Commands extends Component<CommandsProps, CommandsState> {
   constructor(props: CommandsProps) {
