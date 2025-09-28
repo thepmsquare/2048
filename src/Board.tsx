@@ -2,10 +2,8 @@ import "./stylesheets/Board.css";
 
 import { Component } from "react";
 
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
-
 import colorPalette from "./constant.ts";
+import SingleBlock from "./SingleBlock.tsx";
 
 // todo: move to a more appropriate place
 interface Block {
@@ -44,16 +42,11 @@ class Board extends Component<BoardProps> {
       >
         {board.map((block) => {
           return (
-            <Paper
-              style={{
-                backgroundColor: this.getColor(block.value),
-                color: "#FFF",
-              }}
+            <SingleBlock
+              block={block}
               key={`${block.row}-${block.col}`}
-              className="Board-block"
-            >
-              <Typography> {block.value} </Typography>
-            </Paper>
+              backgroundColor={this.getColor(block.value)}
+            />
           );
         })}
       </div>
