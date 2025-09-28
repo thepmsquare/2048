@@ -53,7 +53,12 @@ const Game = () => {
   allBoardsGlobalUnsafe.forEach((board) => {
     for (let i = 1; i <= board.size; i++) {
       for (let j = 1; j <= board.size; j++) {
-        board.board.push({ row: i, col: j, value: 0 });
+        board.board.push({
+          row: i,
+          col: j,
+          value: 0,
+          id: `${i}-${j}`,
+        });
       }
     }
   });

@@ -34,7 +34,7 @@ class Board extends Component<BoardProps> {
           return (
             <SingleBlock
               block={block}
-              key={`${block.row}-${block.col}`}
+              key={block.id}
               backgroundColor={this.getColor(block.value)}
             />
           );
