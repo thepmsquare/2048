@@ -64,7 +64,22 @@ interface TitleRowProps {
   sum: number;
   best: number;
 }
+
+interface Move {
+  old: {
+    row: number;
+    col: number;
+  };
+  new: {
+    row: number;
+    col: number;
+  };
+  type: "slide" | "merge";
+}
+
 export type {
+  Block,
+  Move,
   BoardProps,
   CommandsProps,
   CommandsState,

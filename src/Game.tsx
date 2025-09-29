@@ -17,7 +17,7 @@ import Selector from "./Selector.tsx";
 import TitleRow from "./TitleRow.tsx";
 
 import type { KeyboardEventHandler } from "react";
-import type { GameBoard } from "./types/All.ts";
+import type { GameBoard, Block, Move } from "./types/All.ts";
 
 const Game = () => {
   // change this to change default grid size.
@@ -188,22 +188,64 @@ const Game = () => {
     for (let i = 1; i <= size; i++) {
       cols.push(board.filter((ele) => ele.col === i));
     }
-    cols.forEach((col) => {
-      let curValues = col.map((ele) => ele.value);
-      let filteredCurValues = curValues.filter((ele) => ele);
-      let mergedCurValues = [];
-      for (let i = 0; i < filteredCurValues.length; i++) {
-        if (filteredCurValues[i] === filteredCurValues[i + 1]) {
-          mergedCurValues.push(filteredCurValues[i] + filteredCurValues[i + 1]);
+    let moves: Move[] = [];
+    [{}];
+
+    cols.forEach((col, colIdx) => {
+      let colClone: Block[] = JSON.parse(JSON.stringify(col));
+      // sliding logic
+      let newCol = colClone.filter((ele) => ele.value);
+      for (let rowIdx = newCol.length; rowIdx < size; rowIdx++) {
+        newCol.push({
+          row: rowIdx + 1,
+          col: colIdx + 1,
+          value: 0,
+          id: `${rowIdx + 1}-${colIdx + 1}`,
+        });
+      }
+
+      newCol.forEach((ele, rowIdx) => {
+        if (ele.row !== rowIdx + 1) {
+          moves.push({
+            old: { row: ele.row, col: ele.col },
+            new: { row: rowIdx + 1, col: ele.col },
+            type: "slide",
+          });
+          ele.row = rowIdx + 1;
+          ele.id = `${rowIdx + 1}-${ele.col}`;
+        }
+      });
+      // merging logic
+      let mergedCols: Block[] = [];
+      for (let i = 0; i < newCol.length; i++) {
+        if (newCol[i].value !== 0 && newCol[i].value === newCol[i + 1].value) {
+          mergedCols.push({
+            row: newCol[i].row,
+            col: newCol[i].row,
+            value: newCol[i].value + newCol[i + 1].value,
+            id: newCol[i].id,
+          });
+          moves.push({
+            old: { row: newCol[i].row, col: newCol[i].col },
+            new: { row: newCol[i].row + 1, col: newCol[i].col },
+            type: "merge",
+          });
           i++;
         } else {
-          mergedCurValues.push(filteredCurValues[i]);
+          mergedCols.push({
+            ...newCol[i],
+          });
         }
       }
-      while (mergedCurValues.length !== size) {
-        mergedCurValues.push(0);
+      for (let rowIdx = mergedCols.length; rowIdx < size; rowIdx++) {
+        mergedCols.push({
+          row: rowIdx + 1,
+          col: colIdx + 1,
+          value: 0,
+          id: `${rowIdx + 1}-${colIdx + 1}`,
+        });
       }
-      col.forEach((ele, index) => (ele.value = mergedCurValues[index]));
+      cols[colIdx] = mergedCols;
     });
 
     for (let i = 0; i < cols.length; i++) {
