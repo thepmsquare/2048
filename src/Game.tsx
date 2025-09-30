@@ -73,6 +73,7 @@ const Game = () => {
   const [winDialogOpen, setWinDialogOpen] = React.useState<boolean>(false);
   const [gameOverDialogOpen, setGameOverDialogOpen] =
     React.useState<boolean>(false);
+  const [movesState, setMovesState] = React.useState<Move[]>([]);
 
   let handleKeyInput: KeyboardEventHandler<HTMLDivElement> = (eventData) => {
     let input = eventData.key;
@@ -189,8 +190,6 @@ const Game = () => {
       cols.push(board.filter((ele) => ele.col === i));
     }
     let moves: Move[] = [];
-    [{}];
-
     cols.forEach((col, colIdx) => {
       let colClone: Block[] = JSON.parse(JSON.stringify(col));
       // sliding logic
@@ -226,8 +225,8 @@ const Game = () => {
             id: newCol[i].id,
           });
           moves.push({
-            old: { row: newCol[i].row, col: newCol[i].col },
-            new: { row: newCol[i].row + 1, col: newCol[i].col },
+            old: { row: newCol[i].row + 1, col: newCol[i].col },
+            new: { row: newCol[i].row, col: newCol[i].col },
             type: "merge",
           });
           i++;
@@ -276,6 +275,7 @@ const Game = () => {
         addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex]);
       }
       setAllBoardsState(allBoardsLocalClone);
+      setMovesState(moves);
       window.localStorage.setItem(
         "allBoards",
         JSON.stringify(allBoardsLocalClone)
@@ -301,24 +301,69 @@ const Game = () => {
     for (let i = 1; i <= size; i++) {
       cols.push(board.filter((ele) => ele.col === i));
     }
-    cols.forEach((col) => {
-      let curValues = col.map((ele) => ele.value);
-      let filteredCurValues = curValues.filter((ele) => ele);
-      let mergedCurValues = [];
-      for (let i = filteredCurValues.length - 1; i >= 0; i--) {
-        if (filteredCurValues[i] === filteredCurValues[i - 1]) {
-          mergedCurValues.unshift(
-            filteredCurValues[i] + filteredCurValues[i - 1]
-          );
+    let moves: Move[] = [];
+    cols.forEach((col, colIdx) => {
+      let colClone: Block[] = JSON.parse(JSON.stringify(col));
+      // sliding logic
+      let newCol = colClone.filter((ele) => ele.value);
+      let numLoops = size - newCol.length;
+      for (let rowIdx = 0; rowIdx < numLoops; rowIdx++) {
+        newCol.unshift({
+          row: numLoops - rowIdx,
+          col: colIdx + 1,
+          value: 0,
+          id: `${numLoops - rowIdx}-${colIdx + 1}`,
+        });
+      }
+      newCol.forEach((ele, rowIdx) => {
+        if (ele.row !== rowIdx + 1) {
+          moves.push({
+            old: { row: ele.row, col: ele.col },
+            new: { row: rowIdx + 1, col: ele.col },
+            type: "slide",
+          });
+          ele.row = rowIdx + 1;
+          ele.id = `${rowIdx + 1}-${ele.col}`;
+        }
+      });
+      // merging logic
+      let mergedCols: Block[] = [];
+      for (let i = newCol.length - 1; i >= 0; i--) {
+        if (newCol[i].value !== 0 && newCol[i].value === newCol[i - 1].value) {
+          mergedCols.unshift({
+            row: newCol[i].row,
+            col: newCol[i].row,
+            value: newCol[i].value + newCol[i - 1].value,
+            id: newCol[i].id,
+          });
+          mergedCols.unshift({
+            row: newCol[i].row - 1,
+            col: newCol[i].row,
+            value: 0,
+            id: `${newCol[i].row - 1}-${newCol[i].row}`,
+          });
+          moves.push({
+            old: { row: newCol[i].row - 1, col: newCol[i].col },
+            new: { row: newCol[i].row, col: newCol[i].col },
+            type: "merge",
+          });
           i--;
         } else {
-          mergedCurValues.unshift(filteredCurValues[i]);
+          mergedCols.unshift({
+            ...newCol[i],
+          });
         }
       }
-      while (mergedCurValues.length !== size) {
-        mergedCurValues.unshift(0);
+      numLoops = size - mergedCols.length;
+      for (let rowIdx = 0; rowIdx < numLoops; rowIdx++) {
+        mergedCols.unshift({
+          row: numLoops - rowIdx,
+          col: colIdx + 1,
+          value: 0,
+          id: `${numLoops - rowIdx}-${colIdx + 1}`,
+        });
       }
-      col.forEach((ele, index) => (ele.value = mergedCurValues[index]));
+      cols[colIdx] = mergedCols;
     });
 
     for (let i = 0; i < cols.length; i++) {
@@ -349,6 +394,7 @@ const Game = () => {
         addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex]);
       }
       setAllBoardsState(allBoardsLocalClone);
+      setMovesState(moves);
       window.localStorage.setItem(
         "allBoards",
         JSON.stringify(allBoardsLocalClone)
