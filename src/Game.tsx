@@ -276,6 +276,7 @@ const Game = () => {
       }
       setAllBoardsState(allBoardsLocalClone);
       setMovesState(moves);
+      console.log(movesState);
       window.localStorage.setItem(
         "allBoards",
         JSON.stringify(allBoardsLocalClone)
@@ -395,6 +396,7 @@ const Game = () => {
       }
       setAllBoardsState(allBoardsLocalClone);
       setMovesState(moves);
+      console.log(movesState);
       window.localStorage.setItem(
         "allBoards",
         JSON.stringify(allBoardsLocalClone)
