@@ -531,24 +531,69 @@ const Game = () => {
     for (let i = 1; i <= size; i++) {
       rows.push(board.filter((ele) => ele.row === i));
     }
-    rows.forEach((row) => {
-      let curValues = row.map((ele) => ele.value);
-      let filteredCurValues = curValues.filter((ele) => ele);
-      let mergedCurValues = [];
-      for (let i = filteredCurValues.length - 1; i >= 0; i--) {
-        if (filteredCurValues[i] === filteredCurValues[i - 1]) {
-          mergedCurValues.unshift(
-            filteredCurValues[i] + filteredCurValues[i - 1]
-          );
+    let moves: Move[] = [];
+    rows.forEach((row, rowIdx) => {
+      let rowClone: Block[] = JSON.parse(JSON.stringify(row));
+      // sliding logic
+      let newRow = rowClone.filter((ele) => ele.value);
+      let numLoops = size - newRow.length;
+      for (let colIdx = 0; colIdx < numLoops; colIdx++) {
+        newRow.unshift({
+          row: rowIdx + 1,
+          col: numLoops - colIdx,
+          value: 0,
+          id: `${rowIdx + 1}-${numLoops - colIdx}`,
+        });
+      }
+      newRow.forEach((ele, colIdx) => {
+        if (ele.col !== colIdx + 1) {
+          moves.push({
+            old: { row: ele.row, col: ele.col },
+            new: { row: ele.row, col: colIdx + 1 },
+            type: "slide",
+          });
+          ele.col = colIdx + 1;
+          ele.id = `${ele.row}-${colIdx + 1}`;
+        }
+      });
+      // merging logic
+      let mergedRows: Block[] = [];
+      for (let i = newRow.length - 1; i >= 0; i--) {
+        if (newRow[i].value !== 0 && newRow[i].value === newRow[i - 1].value) {
+          mergedRows.unshift({
+            row: newRow[i].row,
+            col: newRow[i].col,
+            value: newRow[i].value + newRow[i - 1].value,
+            id: newRow[i].id,
+          });
+          mergedRows.unshift({
+            row: newRow[i].row,
+            col: newRow[i].col - 1,
+            value: 0,
+            id: `${newRow[i].row}-${newRow[i].row - 1}`,
+          });
+          moves.push({
+            old: { row: newRow[i].row, col: newRow[i].col - 1 },
+            new: { row: newRow[i].row, col: newRow[i].col },
+            type: "merge",
+          });
           i--;
         } else {
-          mergedCurValues.unshift(filteredCurValues[i]);
+          mergedRows.unshift({
+            ...newRow[i],
+          });
         }
       }
-      while (mergedCurValues.length !== size) {
-        mergedCurValues.unshift(0);
+      numLoops = size - mergedRows.length;
+      for (let colIdx = 0; colIdx < numLoops; colIdx++) {
+        mergedRows.unshift({
+          row: rowIdx + 1,
+          col: numLoops - colIdx,
+          value: 0,
+          id: `${rowIdx + 1}-${numLoops - colIdx}`,
+        });
       }
-      row.forEach((ele, index) => (ele.value = mergedCurValues[index]));
+      rows[rowIdx] = mergedRows;
     });
 
     for (let i = 0; i < rows.length; i++) {
