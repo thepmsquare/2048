@@ -468,7 +468,7 @@ const Game = () => {
           });
         }
       }
-      for (let colIdx = mergedRows.length; colIdx < size; rowIdx++) {
+      for (let colIdx = mergedRows.length; colIdx < size; colIdx++) {
         mergedRows.push({
           row: rowIdx + 1,
           col: colIdx + 1,
