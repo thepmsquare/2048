@@ -506,6 +506,7 @@ const Game = () => {
         addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex]);
       }
       setAllBoardsState(allBoardsLocalClone);
+      setMovesState(moves);
       window.localStorage.setItem(
         "allBoards",
         JSON.stringify(allBoardsLocalClone)
@@ -624,6 +625,7 @@ const Game = () => {
         addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex]);
       }
       setAllBoardsState(allBoardsLocalClone);
+      setMovesState(moves);
       window.localStorage.setItem(
         "allBoards",
         JSON.stringify(allBoardsLocalClone)
