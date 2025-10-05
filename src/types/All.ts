@@ -4,7 +4,6 @@ interface Block {
   row: number;
   col: number;
   value: number;
-  id: string;
 }
 
 interface BoardProps {

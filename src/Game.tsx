@@ -57,7 +57,6 @@ const Game = () => {
           row: i,
           col: j,
           value: 0,
-          id: `${i}-${j}`,
         });
       }
     }
@@ -199,7 +198,6 @@ const Game = () => {
           row: rowIdx + 1,
           col: colIdx + 1,
           value: 0,
-          id: `${rowIdx + 1}-${colIdx + 1}`,
         });
       }
 
@@ -211,7 +209,6 @@ const Game = () => {
             type: "slide",
           });
           ele.row = rowIdx + 1;
-          ele.id = `${rowIdx + 1}-${ele.col}`;
         }
       });
       // merging logic
@@ -222,7 +219,6 @@ const Game = () => {
             row: newCol[i].row,
             col: newCol[i].col,
             value: newCol[i].value + newCol[i + 1].value,
-            id: newCol[i].id,
           });
           moves.push({
             old: { row: newCol[i].row + 1, col: newCol[i].col },
@@ -241,7 +237,6 @@ const Game = () => {
           row: rowIdx + 1,
           col: colIdx + 1,
           value: 0,
-          id: `${rowIdx + 1}-${colIdx + 1}`,
         });
       }
       cols[colIdx] = mergedCols;
@@ -313,7 +308,6 @@ const Game = () => {
           row: numLoops - rowIdx,
           col: colIdx + 1,
           value: 0,
-          id: `${numLoops - rowIdx}-${colIdx + 1}`,
         });
       }
       newCol.forEach((ele, rowIdx) => {
@@ -324,7 +318,6 @@ const Game = () => {
             type: "slide",
           });
           ele.row = rowIdx + 1;
-          ele.id = `${rowIdx + 1}-${ele.col}`;
         }
       });
       // merging logic
@@ -335,13 +328,11 @@ const Game = () => {
             row: newCol[i].row,
             col: newCol[i].col,
             value: newCol[i].value + newCol[i - 1].value,
-            id: newCol[i].id,
           });
           mergedCols.unshift({
             row: newCol[i].row - 1,
             col: newCol[i].col,
             value: 0,
-            id: `${newCol[i].row - 1}-${newCol[i].row}`,
           });
           moves.push({
             old: { row: newCol[i].row - 1, col: newCol[i].col },
@@ -361,7 +352,6 @@ const Game = () => {
           row: numLoops - rowIdx,
           col: colIdx + 1,
           value: 0,
-          id: `${numLoops - rowIdx}-${colIdx + 1}`,
         });
       }
       cols[colIdx] = mergedCols;
@@ -396,7 +386,6 @@ const Game = () => {
       }
       setAllBoardsState(allBoardsLocalClone);
       setMovesState(moves);
-      console.log(movesState);
       window.localStorage.setItem(
         "allBoards",
         JSON.stringify(allBoardsLocalClone)
@@ -432,7 +421,6 @@ const Game = () => {
           row: rowIdx + 1,
           col: colIdx + 1,
           value: 0,
-          id: `${rowIdx + 1}-${colIdx + 1}`,
         });
       }
       newRow.forEach((ele, colIdx) => {
@@ -443,7 +431,6 @@ const Game = () => {
             type: "slide",
           });
           ele.col = colIdx + 1;
-          ele.id = `${ele.row}-${colIdx + 1}`;
         }
       });
       // merging logic
@@ -454,7 +441,6 @@ const Game = () => {
             row: newRow[i].row,
             col: newRow[i].col,
             value: newRow[i].value + newRow[i + 1].value,
-            id: newRow[i].id,
           });
           moves.push({
             old: { row: newRow[i].row, col: newRow[i].col + 1 },
@@ -473,7 +459,6 @@ const Game = () => {
           row: rowIdx + 1,
           col: colIdx + 1,
           value: 0,
-          id: `${rowIdx + 1}-${colIdx + 1}`,
         });
       }
       rows[rowIdx] = mergedRows;
@@ -543,7 +528,6 @@ const Game = () => {
           row: rowIdx + 1,
           col: numLoops - colIdx,
           value: 0,
-          id: `${rowIdx + 1}-${numLoops - colIdx}`,
         });
       }
       newRow.forEach((ele, colIdx) => {
@@ -554,7 +538,6 @@ const Game = () => {
             type: "slide",
           });
           ele.col = colIdx + 1;
-          ele.id = `${ele.row}-${colIdx + 1}`;
         }
       });
       // merging logic
@@ -565,13 +548,11 @@ const Game = () => {
             row: newRow[i].row,
             col: newRow[i].col,
             value: newRow[i].value + newRow[i - 1].value,
-            id: newRow[i].id,
           });
           mergedRows.unshift({
             row: newRow[i].row,
             col: newRow[i].col - 1,
             value: 0,
-            id: `${newRow[i].row}-${newRow[i].row - 1}`,
           });
           moves.push({
             old: { row: newRow[i].row, col: newRow[i].col - 1 },
@@ -591,7 +572,6 @@ const Game = () => {
           row: rowIdx + 1,
           col: numLoops - colIdx,
           value: 0,
-          id: `${rowIdx + 1}-${numLoops - colIdx}`,
         });
       }
       rows[rowIdx] = mergedRows;
