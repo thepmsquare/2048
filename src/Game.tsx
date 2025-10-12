@@ -200,7 +200,6 @@ const Game = () => {
           value: 0,
         });
       }
-
       newCol.forEach((ele, rowIdx) => {
         if (ele.row !== rowIdx + 1) {
           moves.push({
@@ -465,14 +464,19 @@ const Game = () => {
       // merging logic
       let mergedRows: Block[] = [];
       for (let i = 0; i < newRow.length; i++) {
-        if (newRow[i].value !== 0 && newRow[i].value === newRow[i + 1].value) {
+        if (newRow[i].value !== 0 && newRow[i].value === newRow[i + 1]?.value) {
           mergedRows.push({
             row: newRow[i].row,
             col: newRow[i].col,
             value: newRow[i].value + newRow[i + 1].value,
           });
+          mergedRows.push({
+            row: newRow[i].row,
+            col: newRow[i + 1].col,
+            value: 0,
+          });
           moves.push({
-            old: { row: newRow[i].row, col: newRow[i].col + 1 },
+            old: { row: newRow[i].row, col: newRow[i + 1].col },
             new: { row: newRow[i].row, col: newRow[i].col },
             type: "merge",
           });
@@ -483,14 +487,26 @@ const Game = () => {
           });
         }
       }
-      for (let colIdx = mergedRows.length; colIdx < size; colIdx++) {
-        mergedRows.push({
+      // second slide logic
+      let finalRows = mergedRows.filter((ele) => ele.value);
+      for (let colIdx = finalRows.length; colIdx < size; colIdx++) {
+        finalRows.push({
           row: rowIdx + 1,
           col: colIdx + 1,
           value: 0,
         });
       }
-      rows[rowIdx] = mergedRows;
+      finalRows.forEach((ele, colIdx) => {
+        if (ele.col !== colIdx + 1) {
+          moves.push({
+            old: { row: ele.row, col: ele.col },
+            new: { row: ele.col, col: colIdx + 1 },
+            type: "slide",
+          });
+          ele.col = colIdx + 1;
+        }
+      });
+      rows[rowIdx] = finalRows;
     });
     for (let i = 0; i < rows.length; i++) {
       tempNew.push(...rows[i]);
@@ -572,7 +588,7 @@ const Game = () => {
       // merging logic
       let mergedRows: Block[] = [];
       for (let i = newRow.length - 1; i >= 0; i--) {
-        if (newRow[i].value !== 0 && newRow[i].value === newRow[i - 1].value) {
+        if (newRow[i].value !== 0 && newRow[i].value === newRow[i - 1]?.value) {
           mergedRows.unshift({
             row: newRow[i].row,
             col: newRow[i].col,
@@ -580,11 +596,11 @@ const Game = () => {
           });
           mergedRows.unshift({
             row: newRow[i].row,
-            col: newRow[i].col - 1,
+            col: newRow[i - 1].col,
             value: 0,
           });
           moves.push({
-            old: { row: newRow[i].row, col: newRow[i].col - 1 },
+            old: { row: newRow[i].row, col: newRow[i - 1].col },
             new: { row: newRow[i].row, col: newRow[i].col },
             type: "merge",
           });
@@ -595,15 +611,27 @@ const Game = () => {
           });
         }
       }
-      numLoops = size - mergedRows.length;
+      // second slide logic
+      let finalRows = mergedRows.filter((ele) => ele.value);
+      numLoops = size - finalRows.length;
       for (let colIdx = 0; colIdx < numLoops; colIdx++) {
-        mergedRows.unshift({
+        finalRows.unshift({
           row: rowIdx + 1,
           col: numLoops - colIdx,
           value: 0,
         });
       }
-      rows[rowIdx] = mergedRows;
+      finalRows.forEach((ele, colIdx) => {
+        if (ele.col !== colIdx + 1) {
+          moves.push({
+            old: { row: ele.row, col: ele.col },
+            new: { row: ele.row, col: colIdx + 1 },
+            type: "slide",
+          });
+          ele.col = colIdx + 1;
+        }
+      });
+      rows[rowIdx] = finalRows;
     });
 
     for (let i = 0; i < rows.length; i++) {
