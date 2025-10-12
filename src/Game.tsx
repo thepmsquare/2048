@@ -149,10 +149,24 @@ const Game = () => {
         choices.push(curChoice);
       }
     }
+    let moves: Move[] = [];
     choices.forEach((choice) => {
       options[choice].value =
         startValues[Math.floor(Math.random() * startValues.length)];
+      moves.push({
+        old: {
+          col: 0,
+          row: 0,
+        },
+        new: {
+          col: options[choice].col,
+          row: options[choice].row,
+        },
+        type: "create",
+      });
     });
+    console.log(moves);
+    setMovesState(moves);
     const sum = _.sumBy(
       options.filter((ele) => ele.value),
       "value"
@@ -287,7 +301,6 @@ const Game = () => {
       }
       setAllBoardsState(allBoardsLocalClone);
       setMovesState(moves);
-      console.log(movesState);
       window.localStorage.setItem(
         "allBoards",
         JSON.stringify(allBoardsLocalClone)
@@ -859,7 +872,11 @@ const Game = () => {
           />
         </div>
 
-        <Board size={gridSize} board={allBoardsWithCurrentGridSize.board} />
+        <Board
+          size={gridSize}
+          board={allBoardsWithCurrentGridSize.board}
+          movesState={movesState}
+        />
       </div>
       {isBrowser && (
         <Snackbar

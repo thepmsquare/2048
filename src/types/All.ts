@@ -9,6 +9,7 @@ interface Block {
 interface BoardProps {
   size: number;
   board: Block[];
+  movesState: Move[];
 }
 
 interface CommandsProps {
@@ -53,11 +54,6 @@ interface SelectorState {
   value: number;
 }
 
-interface SingleBlockProps {
-  block: Block;
-  backgroundColor: string | undefined;
-}
-
 interface TitleRowProps {
   winCondition: number;
   sum: number;
@@ -73,7 +69,7 @@ interface Move {
     row: number;
     col: number;
   };
-  type: "slide" | "merge";
+  type: "slide" | "merge" | "create";
 }
 
 export type {
@@ -86,7 +82,6 @@ export type {
   ColorPalette,
   GameBoard,
   SelectorProps,
-  SingleBlockProps,
   SelectorState,
   TitleRowProps,
 };
