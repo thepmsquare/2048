@@ -72,7 +72,7 @@ class Board extends Component<BoardProps> {
     }
   };
   animateSlide = (move: Move) => {
-    const oldKey = `${move.old.row}-${move.old.col}`;
+    // const oldKey = `${move.old.row}-${move.old.col}`;
     const newKey = `${move.new.row}-${move.new.col}`;
     const element = this.blockRefs[newKey];
 

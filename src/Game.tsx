@@ -297,7 +297,9 @@ const Game = () => {
       if (allBoardsLocalClone[changeThisIndex].needToWin) {
         checkForWin(allBoardsLocalClone[changeThisIndex]);
       } else {
-        addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex]);
+        moves.push(
+          addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex])
+        );
       }
       setAllBoardsState(allBoardsLocalClone);
       setMovesState(moves);
@@ -423,7 +425,9 @@ const Game = () => {
       if (allBoardsLocalClone[changeThisIndex].needToWin) {
         checkForWin(allBoardsLocalClone[changeThisIndex]);
       } else {
-        addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex]);
+        moves.push(
+          addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex])
+        );
       }
       setAllBoardsState(allBoardsLocalClone);
       setMovesState(moves);
@@ -546,7 +550,9 @@ const Game = () => {
       if (allBoardsLocalClone[changeThisIndex].needToWin) {
         checkForWin(allBoardsLocalClone[changeThisIndex]);
       } else {
-        addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex]);
+        moves.push(
+          addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex])
+        );
       }
       setAllBoardsState(allBoardsLocalClone);
       setMovesState(moves);
@@ -672,7 +678,9 @@ const Game = () => {
       if (allBoardsLocalClone[changeThisIndex].needToWin) {
         checkForWin(allBoardsLocalClone[changeThisIndex]);
       } else {
-        addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex]);
+        moves.push(
+          addRandomNumberInPlace(allBoardsLocalClone[changeThisIndex])
+        );
       }
       setAllBoardsState(allBoardsLocalClone);
       setMovesState(moves);
@@ -706,6 +714,12 @@ const Game = () => {
     // allBoards[changeThisIndex].board = newBoard;
     board.sum = sum;
     board.best = sum > board.best ? sum : board.best;
+    let move: Move = {
+      old: { col: 0, row: 0 },
+      new: { col: changeThisElement.col, row: changeThisElement.row },
+      type: "create",
+    };
+    return move;
   };
 
   let handleReset = () => {
@@ -783,7 +797,9 @@ const Game = () => {
       board.needToWin = false;
       setWinDialogOpen(true);
     } else {
-      addRandomNumberInPlace(board);
+      let moves: Move[] = [];
+      moves.push(addRandomNumberInPlace(board));
+      setMovesState(moves);
     }
   };
 
@@ -803,7 +819,9 @@ const Game = () => {
       return;
     }
     let board = allBoardsLocalClone[changeThisIndex];
-    addRandomNumberInPlace(board);
+    let moves: Move[] = [];
+    moves.push(addRandomNumberInPlace(board));
+    setMovesState(moves);
   };
 
   let handleGameOverDialogClose = () => {
